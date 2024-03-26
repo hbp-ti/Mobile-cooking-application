@@ -13,10 +13,16 @@
         android:theme="@style/Theme.SideChef"
         tools:targetApi="31">
         <activity
-            android:name=".MainPageNav"
+            android:name=".click_recipe_details"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
+            android:name=".Settings"
+            android:exported="false" />
+        <activity
+            android:name=".MyRecipes"
+            android:exported="false" />
+        <activity
+            android:name=".MainPageNav"
             android:exported="false" />
         <activity
             android:name=".CreateAccount"
