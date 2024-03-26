@@ -2,7 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="darkOrange">#FFA800</color>
+    <color name="darkOrange">#FF7F00</color>
+    <color name="Orange">#FFA800</color>
     <color name="grey">#FF59554F</color>
     <color name="hintGrey">#C2BFB9</color>
+    <color name="darkGrey">#494949</color>
+    <color name="selectedItemNav">#E7B127</color>
+    <color name="notSelectedItemNav">#FF000000</color>
 </resources>

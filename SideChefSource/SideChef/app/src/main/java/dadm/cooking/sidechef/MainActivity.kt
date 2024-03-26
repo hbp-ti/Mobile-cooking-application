@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var signUpLink: TextView
     private lateinit var forgotPass: TextView
+    private lateinit var buttonLogIn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         forgotPass.setOnClickListener {
             changeToForgotPassword()
         }
+
+        buttonLogIn = findViewById(R.id.buttonLogIn)
+        buttonLogIn.setOnClickListener {
+            changeToMainPage()
+        }
     }
 
     private fun changeToSignUp() {
@@ -47,4 +53,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+    private fun changeToMainPage() {
+        val intent = Intent(this, MainPageNav::class.java)
+        startActivity(intent)
+        finish()
+    }
+
 }
