@@ -8,5 +8,9 @@
     <color name="hintGrey">#C2BFB9</color>
     <color name="darkGrey">#494949</color>
     <color name="selectedItemNav">#E7B127</color>
+    <color name="nameColor">#E7B127</color>
+    <color name="usernameColor">#E9D091</color>
     <color name="notSelectedItemNav">#FF000000</color>
+    <color name="profileGrey">#313131</color>
+    <color name="redLogOut">#FF0000</color>
 </resources>

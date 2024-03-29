@@ -1,10 +1,14 @@
 package dadm.cooking.sidechef
 
+import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -20,6 +24,9 @@ class Profile : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private lateinit var myrecipesButton: Button
+    private lateinit var settingsButton: Button
+    private lateinit var logoutButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +46,39 @@ class Profile : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
+        settingsButton = view.findViewById(R.id.buttonSettings)
+        logoutButton = view.findViewById(R.id.buttonLogOut)
+
+        myrecipesButton.setOnClickListener {
+            changeToMyRecipes()
+        }
+
+        settingsButton.setOnClickListener {
+            changeToSettings()
+        }
+
+        logoutButton.setOnClickListener {
+            changeToLogIn()
+        }
+
+    }
+
+    private fun changeToMyRecipes() {
+        val intent = Intent(requireActivity(), MyRecipes::class.java)
+        startActivity(intent)
+    }
+
+    private fun changeToSettings() {
+        val intent = Intent(requireActivity(), Settings::class.java)
+        startActivity(intent)
+    }
+
+    private fun changeToLogIn() {
+        val intent = Intent(requireActivity(), MainActivity::class.java)
+        startActivity(intent)
+        requireActivity().finish()
     }
 
     companion object {
