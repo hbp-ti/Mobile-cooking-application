@@ -1,12 +1,17 @@
 package dadm.cooking.sidechef
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class Settings : AppCompatActivity() {
+
+    private lateinit var backButton: ImageButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -16,5 +21,14 @@ class Settings : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        backButton = findViewById(R.id.goBackArrowSettings)
+        backButton.setOnClickListener {
+            changeToProfile()
+        }
+    }
+
+    private fun changeToProfile() {
+        finish()
     }
 }

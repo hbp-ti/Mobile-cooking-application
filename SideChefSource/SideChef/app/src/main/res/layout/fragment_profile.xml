@@ -104,7 +104,7 @@
             android:drawableLeft="@mipmap/recipe_book_icon_foreground"
             android:elevation="8dp"
             android:fontFamily="@font/inter"
-            android:gravity="start|center_vertical"
+            android:gravity="start|center_vertical|center"
             android:text="My Recipes"
             android:textColor="@color/black"
             android:textSize="20dp"
