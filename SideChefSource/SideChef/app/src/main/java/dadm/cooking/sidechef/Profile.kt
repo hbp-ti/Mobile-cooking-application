@@ -1,5 +1,6 @@
 package dadm.cooking.sidechef
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -60,6 +61,7 @@ class Profile : Fragment() {
         }
 
         logoutButton.setOnClickListener {
+            deleteKeeplogin()
             changeToLogIn()
         }
 
@@ -79,6 +81,11 @@ class Profile : Fragment() {
         val intent = Intent(requireActivity(), MainActivity::class.java)
         startActivity(intent)
         requireActivity().finish()
+    }
+
+    private fun deleteKeeplogin() {
+        val sharedPref = requireActivity().getSharedPreferences(R.string.userLogInFile.toString(), Context.MODE_PRIVATE)
+        sharedPref.edit().remove(R.string.keepLoginKey.toString()).apply()
     }
 
     companion object {
