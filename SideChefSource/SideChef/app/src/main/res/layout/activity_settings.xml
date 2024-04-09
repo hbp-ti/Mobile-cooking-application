@@ -22,7 +22,7 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.702">
+        app:layout_constraintVertical_bias="0.746">
 
         <TextView
             android:id="@+id/textViewPasswordLabel"
@@ -85,7 +85,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.569">
 
         <TextView
             android:id="@+id/textViewUserNameLabel"
@@ -148,7 +149,7 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3">
+        app:layout_constraintVertical_bias="0.392">
 
         <TextView
             android:id="@+id/textViewEmailLabel"
@@ -212,7 +213,7 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.102">
+        app:layout_constraintVertical_bias="0.21">
 
         <TextView
             android:id="@+id/textViewNameLabel"
@@ -287,5 +288,22 @@
         app:layout_constraintEnd_toStartOf="@+id/textView6"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/baseline_arrow_back_24" />
+
+    <TextView
+        android:id="@+id/labelValidationSettings"
+        android:layout_width="318dp"
+        android:layout_height="66dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="bottom"
+        android:maxLines="100"
+        android:textColor="@color/redLogOut"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/nameSection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.376"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        app:layout_constraintVertical_bias="0.093" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
