@@ -19,12 +19,16 @@ class click_recipe_details : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        setupView()
+    }
 
+    private fun setupView() {
         backButton = findViewById(R.id.goBackArrowRecipeDetails)
         backButton.setOnClickListener {
             changeToMainActivity()
         }
     }
+
     private fun changeToMainActivity() {
         finish()
     }

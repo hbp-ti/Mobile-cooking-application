@@ -28,6 +28,8 @@ class Settings : AppCompatActivity() {
     private lateinit var editTextCurrentEmail: EditText
     private lateinit var imageViewEditEmail: ImageView
     private lateinit var labelValidation: TextView
+    private var user_id: Int = 0
+    private var username: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,12 @@ class Settings : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        setupView()
+    }
+
+    private fun setupView() {
+        user_id = intent.getIntExtra("user_id", 0)
+        username = intent.getStringExtra("username")
 
         backButton = findViewById(R.id.goBackArrowSettings)
         editTextCurrentName = findViewById(R.id.textViewCurrentName)

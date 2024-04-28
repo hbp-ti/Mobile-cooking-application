@@ -28,6 +28,8 @@ class Profile : Fragment() {
     private lateinit var myrecipesButton: Button
     private lateinit var settingsButton: Button
     private lateinit var logoutButton: Button
+    private var user_id: Int = 0
+    private var username: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +49,10 @@ class Profile : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupView(view, savedInstanceState)
+    }
 
+    private fun setupView(view: View, savedInstanceState: Bundle?) {
         myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
         settingsButton = view.findViewById(R.id.buttonSettings)
         logoutButton = view.findViewById(R.id.buttonLogOut)
@@ -65,6 +70,8 @@ class Profile : Fragment() {
             changeToLogIn()
         }
 
+        user_id = requireActivity().intent.getIntExtra("user_id", 0)
+        username = requireActivity().intent.getStringExtra("username")
     }
 
     private fun changeToMyRecipes() {
@@ -74,6 +81,8 @@ class Profile : Fragment() {
 
     private fun changeToSettings() {
         val intent = Intent(requireActivity(), Settings::class.java)
+        intent.putExtra("user_id", user_id)
+        intent.putExtra("username", username)
         startActivity(intent)
     }
 

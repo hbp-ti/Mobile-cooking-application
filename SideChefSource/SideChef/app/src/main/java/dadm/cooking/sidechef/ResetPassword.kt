@@ -28,6 +28,10 @@ class ResetPassword : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        setupView()
+    }
+
+    private fun setupView() {
         labelValidation = findViewById(R.id.labelValidationReset)
         emailInput = findViewById(R.id.emailInput)
         sendButton = findViewById(R.id.buttonSend)

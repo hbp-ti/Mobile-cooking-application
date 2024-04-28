@@ -20,7 +20,10 @@ class MyRecipes : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        setupView()
+    }
 
+    private fun setupView() {
         backButton = findViewById(R.id.goBackArrowRecipes)
         backButton.setOnClickListener {
             changeToProfile()

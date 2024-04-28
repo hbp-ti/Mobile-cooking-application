@@ -3,6 +3,7 @@ package dadm.cooking.sidechef
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -11,6 +12,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.android.volley.AuthFailureError
+import com.android.volley.NetworkError
+import com.android.volley.Response
+import com.android.volley.ServerError
+import com.android.volley.TimeoutError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
+import org.json.JSONException
+import org.json.JSONObject
+import java.nio.charset.Charset
 
 class CreateAccount : AppCompatActivity() {
 
@@ -32,6 +45,10 @@ class CreateAccount : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        setupView()
+    }
+
+    private fun setupView() {
         inputName = findViewById(R.id.InputName)
         inputEmail = findViewById(R.id.InputEmail)
         inputUsername = findViewById(R.id.InputUsername)
@@ -42,7 +59,8 @@ class CreateAccount : AppCompatActivity() {
         signUpButton.setOnClickListener {
             val isCredentialsVal = validateCredentials(inputName.text.toString(), inputEmail.text.toString(), inputUsername.text.toString(), inputPassword.text.toString(), inputConfirmPassword.text.toString())
             if (isCredentialsVal) {
-                changeToSignIn()
+                signUpButton.isEnabled = false
+                createAccount(name = inputName.text.toString(), email = inputEmail.text.toString(), username = inputUsername.text.toString(), password = inputPassword.text.toString())
             }
         }
         signInLink = findViewById(R.id.loginLabel)
@@ -92,6 +110,73 @@ class CreateAccount : AppCompatActivity() {
             return true
         }
     }
+
+    private fun createAccount(name: String, email: String, username: String, password: String) {
+        val url = getString(R.string.registerURL)
+        val button : Button = findViewById(R.id.buttonSignUp)
+
+        val jsonBody = JSONObject()
+        jsonBody.put("name", name)
+        jsonBody.put("email", email)
+        jsonBody.put("username", username)
+        jsonBody.put("password", password)
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(Method.POST, url,
+            Response.Listener { response ->
+                try {
+                    Log.d("APP_REST",  response)
+                    changeToSignIn()
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    button.isEnabled = true
+                }
+            },
+            Response.ErrorListener {error ->
+                val errorMessage: String = when(error) {
+                    is AuthFailureError -> "Authentication Error!"
+                    is NetworkError -> "Network error!"
+                    is TimeoutError -> "Time is over!"
+                    is ServerError -> {
+                        try {
+                            val errorResponse = JSONObject(String(error.networkResponse.data))
+                            if (errorResponse.has("error")) {
+                                errorResponse.getString("error")
+                            } else {
+                                "Unknown server error"
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            "Unknown server error"
+                        }
+                    }
+                    else -> "Unknown Error"
+                }
+                showError(errorMessage)
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                button.isEnabled = true
+            }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun showError(message: String) {
+        labelValidation.setTextColor(Color.RED)
+        labelValidation.text = message
+        labelValidation.visibility = View.VISIBLE
+    }
+
 
     private fun changeToSignIn() {
         val intent = Intent(this, MainActivity::class.java)

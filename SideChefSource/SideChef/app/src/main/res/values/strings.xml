@@ -2,4 +2,7 @@
     <string name="app_name">SideChef</string>
     <string name="userLogInFile">logInData</string>
     <string name="keepLoginKey">keeploginKey</string>
+    <string name="loginURL">https://sidechef-api.vercel.app/login</string>
+    <string name="registerURL">https://sidechef-api.vercel.app/register</string>
+    <string name="tokenKeyFile">tokenKey</string>
 </resources>
