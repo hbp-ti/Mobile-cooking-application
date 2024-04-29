@@ -4,12 +4,28 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import com.android.volley.AuthFailureError
+import com.android.volley.NetworkError
+import com.android.volley.Response
+import com.android.volley.ServerError
+import com.android.volley.TimeoutError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
+import org.json.JSONException
+import org.json.JSONObject
+import java.nio.charset.Charset
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,8 +44,13 @@ class Profile : Fragment() {
     private lateinit var myrecipesButton: Button
     private lateinit var settingsButton: Button
     private lateinit var logoutButton: Button
+    private lateinit var name_label: TextView
+    private lateinit var username_label: TextView
     private var user_id: Int = 0
-    private var username: String? = null
+    private lateinit var username: String
+    private lateinit var token: String
+    private lateinit var email: String
+    private lateinit var name: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,12 +71,15 @@ class Profile : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView(view, savedInstanceState)
+
     }
 
     private fun setupView(view: View, savedInstanceState: Bundle?) {
         myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
         settingsButton = view.findViewById(R.id.buttonSettings)
         logoutButton = view.findViewById(R.id.buttonLogOut)
+        name_label = view.findViewById(R.id.nameUser)
+        username_label = view.findViewById(R.id.username)
 
         myrecipesButton.setOnClickListener {
             changeToMyRecipes()
@@ -71,7 +95,13 @@ class Profile : Fragment() {
         }
 
         user_id = requireActivity().intent.getIntExtra("user_id", 0)
-        username = requireActivity().intent.getStringExtra("username")
+        username = requireActivity().intent.getStringExtra("username").toString()
+        token = requireActivity().intent.getStringExtra("token").toString()
+        name = requireActivity().intent.getStringExtra("name").toString()
+        email = requireActivity().intent.getStringExtra("email").toString()
+
+        name_label.text = name
+        username_label.text = username
     }
 
     private fun changeToMyRecipes() {
@@ -83,6 +113,9 @@ class Profile : Fragment() {
         val intent = Intent(requireActivity(), Settings::class.java)
         intent.putExtra("user_id", user_id)
         intent.putExtra("username", username)
+        intent.putExtra("name", name)
+        intent.putExtra("email", email)
+        intent.putExtra("token", token)
         startActivity(intent)
     }
 

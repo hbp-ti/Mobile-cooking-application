@@ -282,7 +282,7 @@
                 android:maxLines="1"
                 android:inputType="textPassword"
                 android:imeOptions="actionDone"
-                android:text="Hugo Bessa"
+                android:text="******"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 tools:ignore="TouchTargetSizeCheck" />

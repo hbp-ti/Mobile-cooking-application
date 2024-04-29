@@ -29,7 +29,10 @@ class Settings : AppCompatActivity() {
     private lateinit var imageViewEditEmail: ImageView
     private lateinit var labelValidation: TextView
     private var user_id: Int = 0
-    private var username: String? = null
+    private lateinit var username: String
+    private lateinit var name: String
+    private lateinit var email: String
+    private lateinit var token: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +48,10 @@ class Settings : AppCompatActivity() {
 
     private fun setupView() {
         user_id = intent.getIntExtra("user_id", 0)
-        username = intent.getStringExtra("username")
+        username = intent.getStringExtra("username").toString()
+        name = intent.getStringExtra("name").toString()
+        email = intent.getStringExtra("email").toString()
+        token = intent.getStringExtra("token").toString()
 
         backButton = findViewById(R.id.goBackArrowSettings)
         editTextCurrentName = findViewById(R.id.textViewCurrentName)
@@ -57,6 +63,11 @@ class Settings : AppCompatActivity() {
         editTextCurrentEmail = findViewById(R.id.textViewCurrentEmail)
         imageViewEditEmail = findViewById(R.id.imageViewEditEmail)
         labelValidation = findViewById(R.id.labelValidationSettings)
+
+        editTextCurrentName.setText(name)
+        editTextCurrentUserName.setText(username)
+        editTextCurrentEmail.setText(email)
+        editTextCurrentPassword.setText("*****")
 
         imageViewEditName.setOnClickListener {
             enableEditText(editTextCurrentName)
@@ -178,7 +189,7 @@ class Settings : AppCompatActivity() {
     }
 
     private fun validateUsername(username: String): Boolean {
-        val usernamePattern = Regex("^[a-zA-Z0-9]{5,15}$")
+        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
         if (username.isBlank()) {
             labelValidation.setTextColor(Color.RED)
             labelValidation.text = "Please fill the input fields"

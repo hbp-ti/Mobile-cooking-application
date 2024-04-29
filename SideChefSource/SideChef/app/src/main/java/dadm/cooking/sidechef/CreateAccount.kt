@@ -72,7 +72,7 @@ class CreateAccount : AppCompatActivity() {
     private fun validateCredentials(name: String, email: String, username: String, password: String, confirmPassword: String): Boolean {
         val namePattern = Regex("^[a-zA-Z ]{2,30}\$")
         val emailPattern = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$")
-        val usernamePattern = Regex("^[a-zA-Z0-9]{5,15}$")
+        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
         val passwordPattern = Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|<>?{}\\[\\]~])(?!.*\\s).{8,}\$")
 
         if (name.isBlank() || email.isBlank() || username.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
@@ -116,12 +116,12 @@ class CreateAccount : AppCompatActivity() {
         val button : Button = findViewById(R.id.buttonSignUp)
 
         val jsonBody = JSONObject()
-        jsonBody.put("name", name)
-        jsonBody.put("email", email)
-        jsonBody.put("username", username)
-        jsonBody.put("password", password)
+        jsonBody.put("name", name.trim())
+        jsonBody.put("email", email.trim())
+        jsonBody.put("username", username.trim())
+        jsonBody.put("password", password.trim())
         val requestBody = jsonBody.toString()
-
+        
         val stringRequest: StringRequest = object : StringRequest(Method.POST, url,
             Response.Listener { response ->
                 try {
