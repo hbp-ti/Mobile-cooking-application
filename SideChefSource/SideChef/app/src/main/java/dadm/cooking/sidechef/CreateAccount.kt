@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +37,8 @@ class CreateAccount : AppCompatActivity() {
     private lateinit var inputConfirmPassword: EditText
     private lateinit var signUpButton: Button
     private lateinit var labelValidation: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var frameProgress: FrameLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +53,8 @@ class CreateAccount : AppCompatActivity() {
     }
 
     private fun setupView() {
+        progressBar = findViewById(R.id.progressBarRegister)
+        frameProgress = findViewById(R.id.frameProgressRegister)
         inputName = findViewById(R.id.InputName)
         inputEmail = findViewById(R.id.InputEmail)
         inputUsername = findViewById(R.id.InputUsername)
@@ -60,6 +66,14 @@ class CreateAccount : AppCompatActivity() {
             val isCredentialsVal = validateCredentials(inputName.text.toString(), inputEmail.text.toString(), inputUsername.text.toString(), inputPassword.text.toString(), inputConfirmPassword.text.toString())
             if (isCredentialsVal) {
                 signUpButton.isEnabled = false
+                inputName.isEnabled = false
+                inputEmail.isEnabled = false
+                inputUsername.isEnabled = false
+                inputPassword.isEnabled = false
+                inputConfirmPassword.isEnabled = false
+                frameProgress.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+                signInLink.isEnabled = false
                 createAccount(name = inputName.text.toString(), email = inputEmail.text.toString(), username = inputUsername.text.toString(), password = inputPassword.text.toString())
             }
         }
@@ -126,11 +140,22 @@ class CreateAccount : AppCompatActivity() {
             Response.Listener { response ->
                 try {
                     Log.d("APP_REST",  response)
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
                     changeToSignIn()
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
                     button.isEnabled = true
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    signUpButton.isEnabled = true
+                    inputName.isEnabled = true
+                    inputEmail.isEnabled = true
+                    inputUsername.isEnabled = true
+                    inputPassword.isEnabled = true
+                    inputConfirmPassword.isEnabled = true
+                    signInLink.isEnabled = true
                 }
             },
             Response.ErrorListener {error ->
@@ -157,6 +182,15 @@ class CreateAccount : AppCompatActivity() {
                 Log.d("APP_REST", error.toString())
                 Log.d("APP_REST", error.networkResponse.statusCode.toString())
                 button.isEnabled = true
+                frameProgress.visibility = View.GONE
+                progressBar.visibility = View.GONE
+                signUpButton.isEnabled = true
+                inputName.isEnabled = true
+                inputEmail.isEnabled = true
+                inputUsername.isEnabled = true
+                inputPassword.isEnabled = true
+                inputConfirmPassword.isEnabled = true
+                signInLink.isEnabled = true
             }) {
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
