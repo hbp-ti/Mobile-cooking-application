@@ -39,7 +39,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="638dp"
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -47,7 +47,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6"
-        app:layout_constraintVertical_bias="0.148">
+        app:layout_constraintVertical_bias="0.308">
 
 
         <TextView
@@ -55,15 +55,14 @@
             android:layout_width="346dp"
             android:layout_height="86dp"
             android:layout_marginBottom="16dp"
-            android:maxLines="100"
             android:gravity="bottom"
+            android:maxLines="100"
             android:textColor="@android:color/holo_red_light"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textView6"
             app:layout_constraintVertical_bias="0.0" />
-
 
 
         <RelativeLayout
@@ -222,8 +221,8 @@
                 android:enabled="false"
                 android:imeOptions="actionDone"
                 android:inputType="textEmailAddress"
-                android:text="hugobessa2004@gmail.com"
                 android:maxLines="1"
+                android:text="hugobessa2004@gmail.com"
                 android:textColor="@android:color/black"
                 android:textSize="13sp"
                 tools:ignore="TouchTargetSizeCheck" />
@@ -279,9 +278,9 @@
                 android:layout_toEndOf="@+id/textViewPasswordLabel"
                 android:background="@android:color/transparent"
                 android:enabled="false"
-                android:maxLines="1"
-                android:inputType="textPassword"
                 android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:maxLines="1"
                 android:text="******"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
@@ -301,5 +300,40 @@
                 android:src="@drawable/pen_icon"
                 tools:ignore="SpeakableTextPresentCheck" />
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/saveChanges"
+            android:layout_width="340dp"
+            android:layout_height="68dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="13dp"
+            android:layout_marginBottom="10dp"
+            android:backgroundTint="@color/darkOrange"
+            android:fontFamily="@font/inter_bold"
+            android:text="Save Changes"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            app:cornerRadius="15dp"
+            tools:layout_editor_absoluteX="173dp"
+            tools:layout_editor_absoluteY="624dp" />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/frameProgressSettings"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_blur">
+
+        <ProgressBar
+            android:id="@+id/progressBarSettings"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,5 +5,8 @@
     <string name="loginURL">https://sidechef-api.vercel.app/login</string>
     <string name="registerURL">https://sidechef-api.vercel.app/register</string>
     <string name="getuserURL">https://sidechef-api.vercel.app/getUser</string>
+    <string name="changeUserURL">https://sidechef-api.vercel.app/changeUser</string>
+    <string name="changePasswordURL">https://sidechef-api.vercel.app/changePassword</string>
+    <string name="ProfileData">profileDataUpdated</string>
     <string name="tokenKeyFile">tokenKey</string>
 </resources>

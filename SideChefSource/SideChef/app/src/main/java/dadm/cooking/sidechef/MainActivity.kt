@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getUserInfo(id_user: Int) {
         val url = getString(R.string.getuserURL) + "/$id_user"
-        Log.d("APP_REST", url)
+
         val stringRequest: StringRequest = object : StringRequest(
             Method.GET, url,
             Response.Listener { response ->

@@ -3,6 +3,7 @@ package dadm.cooking.sidechef
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -14,7 +15,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
+import com.android.volley.AuthFailureError
+import com.android.volley.NetworkError
+import com.android.volley.Response
+import com.android.volley.ServerError
+import com.android.volley.TimeoutError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
+import org.json.JSONException
+import org.json.JSONObject
+import java.nio.charset.Charset
 
 class Settings : AppCompatActivity() {
 
@@ -28,11 +45,20 @@ class Settings : AppCompatActivity() {
     private lateinit var editTextCurrentEmail: EditText
     private lateinit var imageViewEditEmail: ImageView
     private lateinit var labelValidation: TextView
+    private lateinit var saveChangesButton: Button
+    private lateinit var progressBar: ProgressBar
+    private lateinit var frameProgress: FrameLayout
     private var user_id: Int = 0
     private lateinit var username: String
     private lateinit var name: String
     private lateinit var email: String
     private lateinit var token: String
+    private lateinit var old_name: String
+    private lateinit var old_username: String
+    private lateinit var old_email: String
+    private lateinit var new_name: String
+    private lateinit var new_username: String
+    private lateinit var new_email: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +79,9 @@ class Settings : AppCompatActivity() {
         email = intent.getStringExtra("email").toString()
         token = intent.getStringExtra("token").toString()
 
+        frameProgress = findViewById(R.id.frameProgressSettings)
+        progressBar = findViewById(R.id.progressBarSettings)
+        saveChangesButton = findViewById(R.id.saveChanges)
         backButton = findViewById(R.id.goBackArrowSettings)
         editTextCurrentName = findViewById(R.id.textViewCurrentName)
         imageViewEditName = findViewById(R.id.imageViewEditName)
@@ -69,11 +98,24 @@ class Settings : AppCompatActivity() {
         editTextCurrentEmail.setText(email)
         editTextCurrentPassword.setText("*****")
 
+        old_name = editTextCurrentName.text.toString()
+        old_username = editTextCurrentUserName.text.toString()
+        old_email = editTextCurrentEmail.text.toString()
+        new_name = old_name
+        new_username = old_username
+        new_email = old_email
+
+
+
         imageViewEditName.setOnClickListener {
             enableEditText(editTextCurrentName)
         }
         backButton.setOnClickListener {
             changeToProfile()
+        }
+
+        saveChangesButton.setOnClickListener {
+            saveChanges()
         }
 
         editTextCurrentName.setOnEditorActionListener { _, actionId, event ->
@@ -82,6 +124,7 @@ class Settings : AppCompatActivity() {
                 if (isNameValid) {
                     val currentText = editTextCurrentName.text.toString()
                     editTextCurrentName.setText(currentText)
+                    new_name = currentText
                     editTextCurrentName.isEnabled = false
                     val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(editTextCurrentName.windowToken, 0)
@@ -101,6 +144,7 @@ class Settings : AppCompatActivity() {
                 if (isUsernameValid) {
                     val currentText = editTextCurrentUserName.text.toString()
                     editTextCurrentUserName.setText(currentText)
+                    new_username = currentText
                     editTextCurrentUserName.isEnabled = false
                     val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(editTextCurrentUserName.windowToken, 0)
@@ -120,6 +164,7 @@ class Settings : AppCompatActivity() {
                 if (isEmailValid) {
                     val currentText = editTextCurrentEmail.text.toString()
                     editTextCurrentEmail.setText(currentText)
+                    new_email = currentText
                     editTextCurrentEmail.isEnabled = false
                     val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(editTextCurrentEmail.windowToken, 0)
@@ -151,6 +196,272 @@ class Settings : AppCompatActivity() {
         }
     }
 
+    private fun saveChanges() {
+        if (new_name != old_name || new_username != old_username || new_email != old_email && editTextCurrentPassword.text.toString() == "*****") {
+            frameProgress.visibility = View.VISIBLE
+            progressBar.visibility = View.VISIBLE
+            saveChangesButton.isEnabled = false
+            editTextCurrentName.isEnabled = false;
+            imageViewEditName.isEnabled = false;
+            editTextCurrentUserName.isEnabled = false;
+            imageViewEditUserName.isEnabled = false;
+            editTextCurrentPassword.isEnabled = false;
+            imageViewEditPassword.isEnabled = false;
+            editTextCurrentEmail.isEnabled = false;
+            imageViewEditEmail.isEnabled = false;
+            changeCredentials(name = new_name, username = new_username, email = new_email)
+        } else if (new_name == old_name && new_username == old_username && new_email == old_email && editTextCurrentPassword.text.toString() != "*****") {
+            val isPasswordValid: Boolean = validatePassword(editTextCurrentPassword.text.toString())
+            if (isPasswordValid) {
+                frameProgress.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+                saveChangesButton.isEnabled = false
+                editTextCurrentName.isEnabled = false;
+                imageViewEditName.isEnabled = false;
+                editTextCurrentUserName.isEnabled = false;
+                imageViewEditUserName.isEnabled = false;
+                editTextCurrentPassword.isEnabled = false;
+                imageViewEditPassword.isEnabled = false;
+                editTextCurrentEmail.isEnabled = false;
+                imageViewEditEmail.isEnabled = false;
+                var new_password = editTextCurrentPassword.text.toString()
+                changePassword(password = new_password)
+            }
+        } else if (new_name != old_name || new_username != old_username || new_email != old_email && editTextCurrentPassword.text.toString() != "*****") {
+            val isPasswordValid: Boolean = validatePassword(editTextCurrentPassword.text.toString())
+            if (isPasswordValid) {
+                frameProgress.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+                saveChangesButton.isEnabled = false
+                editTextCurrentName.isEnabled = false;
+                imageViewEditName.isEnabled = false;
+                editTextCurrentUserName.isEnabled = false;
+                imageViewEditUserName.isEnabled = false;
+                editTextCurrentPassword.isEnabled = false;
+                imageViewEditPassword.isEnabled = false;
+                editTextCurrentEmail.isEnabled = false;
+                imageViewEditEmail.isEnabled = false;
+                var new_password = editTextCurrentPassword.text.toString()
+                changePassword(password = new_password)
+                changeCredentials(name = new_name, username = new_username, email = new_email)
+            }
+        }
+    }
+
+    private fun changePassword(password: String) {
+        val url = getString(R.string.changePasswordURL) + "/$user_id"
+
+        val jsonBody = JSONObject()
+        jsonBody.put("password", password)
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.PUT, url,
+            Response.Listener { response ->
+                try {
+                    Log.d("APP_REST",  handleUpdateUserResponse(response).toString())
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    saveChangesButton.isEnabled = true
+                    editTextCurrentName.isEnabled = true;
+                    imageViewEditName.isEnabled = true;
+                    editTextCurrentUserName.isEnabled = true;
+                    imageViewEditUserName.isEnabled = true;
+                    editTextCurrentPassword.isEnabled = true;
+                    imageViewEditPassword.isEnabled = true;
+                    editTextCurrentEmail.isEnabled = true;
+                    imageViewEditEmail.isEnabled = true;
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    saveChangesButton.isEnabled = true
+                    editTextCurrentName.isEnabled = true;
+                    imageViewEditName.isEnabled = true;
+                    editTextCurrentUserName.isEnabled = true;
+                    imageViewEditUserName.isEnabled = true;
+                    editTextCurrentPassword.isEnabled = true;
+                    imageViewEditPassword.isEnabled = true;
+                    editTextCurrentEmail.isEnabled = true;
+                    imageViewEditEmail.isEnabled = true;
+
+                }
+            },
+            Response.ErrorListener { error ->
+                val errorMessage: String = when(error) {
+                    is AuthFailureError -> "Authentication Error! Check Credentials"
+                    is NetworkError -> "Network error!"
+                    is TimeoutError -> "Time is over!"
+                    is ServerError -> {
+                        try {
+                            val errorResponse = JSONObject(String(error.networkResponse.data))
+                            if (errorResponse.has("error")) {
+                                errorResponse.getString("error")
+                            } else {
+                                "Unknown server error"
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            "Unknown server error"
+                        }
+                    }
+                    else -> "Unknown error"
+                }
+                showError(errorMessage)
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                frameProgress.visibility = View.GONE
+                progressBar.visibility = View.GONE
+                saveChangesButton.isEnabled = true
+                editTextCurrentName.isEnabled = true;
+                imageViewEditName.isEnabled = true;
+                editTextCurrentUserName.isEnabled = true;
+                imageViewEditUserName.isEnabled = true;
+                editTextCurrentPassword.isEnabled = true;
+                imageViewEditPassword.isEnabled = true;
+                editTextCurrentEmail.isEnabled = true;
+                imageViewEditEmail.isEnabled = true;
+
+            }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+
+                headers["Authorization"] = "Bearer $token"
+                return headers
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun changeCredentials(name: String, username: String, email: String) {
+        val url = getString(R.string.changeUserURL) + "/$user_id"
+
+        val jsonBody = JSONObject()
+        jsonBody.put("name", name.trim())
+        jsonBody.put("username", username.trim())
+        jsonBody.put("email", email.trim())
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.PUT, url,
+            Response.Listener { response ->
+                try {
+                    handleUpdateUserResponse(response)
+                    Log.d("APP_REST",  handleUpdateUserResponse(response).toString())
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    saveChangesButton.isEnabled = true
+                    editTextCurrentName.isEnabled = true;
+                    imageViewEditName.isEnabled = true;
+                    editTextCurrentUserName.isEnabled = true;
+                    imageViewEditUserName.isEnabled = true;
+                    editTextCurrentPassword.isEnabled = true;
+                    imageViewEditPassword.isEnabled = true;
+                    editTextCurrentEmail.isEnabled = true;
+                    imageViewEditEmail.isEnabled = true;
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    saveChangesButton.isEnabled = true
+                    editTextCurrentName.isEnabled = true;
+                    imageViewEditName.isEnabled = true;
+                    editTextCurrentUserName.isEnabled = true;
+                    imageViewEditUserName.isEnabled = true;
+                    editTextCurrentPassword.isEnabled = true;
+                    imageViewEditPassword.isEnabled = true;
+                    editTextCurrentEmail.isEnabled = true;
+                    imageViewEditEmail.isEnabled = true;
+
+                }
+            },
+            Response.ErrorListener { error ->
+                val errorMessage: String = when(error) {
+                    is AuthFailureError -> "Authentication Error! Check Credentials"
+                    is NetworkError -> "Network error!"
+                    is TimeoutError -> "Time is over!"
+                    is ServerError -> {
+                        try {
+                            val errorResponse = JSONObject(String(error.networkResponse.data))
+                            if (errorResponse.has("error")) {
+                                errorResponse.getString("error")
+                            } else {
+                                "Unknown server error"
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            "Unknown server error"
+                        }
+                    }
+                    else -> "Unknown error"
+                }
+                showError(errorMessage)
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                frameProgress.visibility = View.GONE
+                progressBar.visibility = View.GONE
+                saveChangesButton.isEnabled = true
+                editTextCurrentName.isEnabled = true;
+                imageViewEditName.isEnabled = true;
+                editTextCurrentUserName.isEnabled = true;
+                imageViewEditUserName.isEnabled = true;
+                editTextCurrentPassword.isEnabled = true;
+                imageViewEditPassword.isEnabled = true;
+                editTextCurrentEmail.isEnabled = true;
+                imageViewEditEmail.isEnabled = true;
+
+            }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+
+                headers["Authorization"] = "Bearer $token"
+                return headers
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun handleUpdateUserResponse(response: String) {
+        val builder = GsonBuilder()
+        builder.setPrettyPrinting()
+        val gson = builder.create()
+        try {
+            val res: ChangeUserData = gson.fromJson(response, ChangeUserData::class.java)
+            val fragmentManager = supportFragmentManager
+            val profileFragment = fragmentManager.findFragmentById(R.id.ContentframeLayout) as? Profile
+            profileFragment?.updateLabels(nameUpdated = res.name, usernameUpdated = res.username, emailUpdated = res.email)
+        } catch (e: JsonSyntaxException) {
+            Log.d("APP_REST", e.toString())
+        }
+    }
+
+    private fun showError(message: String) {
+        labelValidation.setTextColor(Color.RED)
+        labelValidation.text = message
+        labelValidation.visibility = View.VISIBLE
+    }
 
     private fun validateName(name: String): Boolean {
         val namePattern = Regex("^[a-zA-Z ]{2,30}\$")

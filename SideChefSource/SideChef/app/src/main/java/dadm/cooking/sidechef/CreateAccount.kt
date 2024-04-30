@@ -127,7 +127,6 @@ class CreateAccount : AppCompatActivity() {
 
     private fun createAccount(name: String, email: String, username: String, password: String) {
         val url = getString(R.string.registerURL)
-        val button : Button = findViewById(R.id.buttonSignUp)
 
         val jsonBody = JSONObject()
         jsonBody.put("name", name.trim())
@@ -146,7 +145,7 @@ class CreateAccount : AppCompatActivity() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
-                    button.isEnabled = true
+                    signUpButton.isEnabled = true
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
                     signUpButton.isEnabled = true
@@ -158,7 +157,7 @@ class CreateAccount : AppCompatActivity() {
                     signInLink.isEnabled = true
                 }
             },
-            Response.ErrorListener {error ->
+            Response.ErrorListener { error ->
                 val errorMessage: String = when(error) {
                     is AuthFailureError -> "Authentication Error!"
                     is NetworkError -> "Network error!"
@@ -181,7 +180,7 @@ class CreateAccount : AppCompatActivity() {
                 showError(errorMessage)
                 Log.d("APP_REST", error.toString())
                 Log.d("APP_REST", error.networkResponse.statusCode.toString())
-                button.isEnabled = true
+                signUpButton.isEnabled = true
                 frameProgress.visibility = View.GONE
                 progressBar.visibility = View.GONE
                 signUpButton.isEnabled = true
@@ -210,7 +209,6 @@ class CreateAccount : AppCompatActivity() {
         labelValidation.text = message
         labelValidation.visibility = View.VISIBLE
     }
-
 
     private fun changeToSignIn() {
         val intent = Intent(this, MainActivity::class.java)
