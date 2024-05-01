@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
     private fun validateCredentials(username: String, password: String): Boolean {
         val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
         val passwordPattern = Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|<>?{}\\[\\]~])(?!.*\\s).{8,}\$")
-        if (username.isBlank() || password.isBlank()) {
+        if (username.isBlank() or password.isBlank()) {
             labelValidation.setTextColor(Color.RED)
             labelValidation.text = "Please fill the input fields"
             labelValidation.visibility = View.VISIBLE

@@ -73,6 +73,11 @@ class Profile : Fragment() {
         setupView(view, savedInstanceState)
     }
 
+    override fun onStop() {
+        super.onStop()
+        deleteProfileData()
+    }
+
     private fun setupView(view: View, savedInstanceState: Bundle?) {
         myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
         settingsButton = view.findViewById(R.id.buttonSettings)
@@ -141,13 +146,15 @@ class Profile : Fragment() {
     }
 
     fun updateLabels(nameUpdated: String, usernameUpdated: String, emailUpdated: String) {
+        Log.d("APP_REST", "INSIDE UPDATE LABELS: $nameUpdated + $usernameUpdated + $emailUpdated")
+        saveProfileData(name = nameUpdated, username = usernameUpdated, email = emailUpdated)
         name = nameUpdated
         username = usernameUpdated
         email = emailUpdated
         name_label.text = nameUpdated
         username_label.text = usernameUpdated
-        saveProfileData(name = nameUpdated, username = usernameUpdated, email = emailUpdated)
     }
+
 
     private fun loadProfileData(): Triple<String?, String?, String?> {
         val sharedPref = requireActivity().getSharedPreferences(R.string.ProfileData.toString(), Context.MODE_PRIVATE)

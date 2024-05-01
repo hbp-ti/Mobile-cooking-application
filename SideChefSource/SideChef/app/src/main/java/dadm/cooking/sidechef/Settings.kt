@@ -1,6 +1,7 @@
 package dadm.cooking.sidechef
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -21,8 +22,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.NetworkError
 import com.android.volley.Response
+import com.android.volley.RetryPolicy
 import com.android.volley.ServerError
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
@@ -56,9 +59,6 @@ class Settings : AppCompatActivity() {
     private lateinit var old_name: String
     private lateinit var old_username: String
     private lateinit var old_email: String
-    private lateinit var new_name: String
-    private lateinit var new_username: String
-    private lateinit var new_email: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,10 +101,6 @@ class Settings : AppCompatActivity() {
         old_name = editTextCurrentName.text.toString()
         old_username = editTextCurrentUserName.text.toString()
         old_email = editTextCurrentEmail.text.toString()
-        new_name = old_name
-        new_username = old_username
-        new_email = old_email
-
 
 
         imageViewEditName.setOnClickListener {
@@ -118,135 +114,63 @@ class Settings : AppCompatActivity() {
             saveChanges()
         }
 
-        editTextCurrentName.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event?.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_ENTER)) {
-                val isNameValid: Boolean = validateName(editTextCurrentName.text.toString())
-                if (isNameValid) {
-                    val currentText = editTextCurrentName.text.toString()
-                    editTextCurrentName.setText(currentText)
-                    new_name = currentText
-                    editTextCurrentName.isEnabled = false
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(editTextCurrentName.windowToken, 0)
-                }
-                true
-            } else {
-                false
-            }
-        }
-
         imageViewEditUserName.setOnClickListener {
             enableEditText(editTextCurrentUserName)
-        }
-        editTextCurrentUserName.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event?.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_ENTER)) {
-                val isUsernameValid: Boolean = validateUsername(editTextCurrentUserName.text.toString())
-                if (isUsernameValid) {
-                    val currentText = editTextCurrentUserName.text.toString()
-                    editTextCurrentUserName.setText(currentText)
-                    new_username = currentText
-                    editTextCurrentUserName.isEnabled = false
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(editTextCurrentUserName.windowToken, 0)
-                }
-                true
-            } else {
-                false
-            }
         }
 
         imageViewEditEmail.setOnClickListener {
             enableEditText(editTextCurrentEmail)
         }
-        editTextCurrentEmail.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event?.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_ENTER)) {
-                val isEmailValid: Boolean = validateEmail(editTextCurrentEmail.text.toString())
-                if (isEmailValid) {
-                    val currentText = editTextCurrentEmail.text.toString()
-                    editTextCurrentEmail.setText(currentText)
-                    new_email = currentText
-                    editTextCurrentEmail.isEnabled = false
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(editTextCurrentEmail.windowToken, 0)
-                }
-                true
-            } else {
-                false
-            }
-        }
-
 
         imageViewEditPassword.setOnClickListener {
             enableEditText(editTextCurrentPassword)
         }
-        editTextCurrentPassword.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event?.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_ENTER)) {
-                val isPasswordValid: Boolean = validatePassword(editTextCurrentPassword.text.toString())
-                if (isPasswordValid) {
-                    val currentText = editTextCurrentPassword.text.toString()
-                    editTextCurrentPassword.setText(currentText)
-                    editTextCurrentPassword.isEnabled = false
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(editTextCurrentPassword.windowToken, 0)
-                }
-                true
-            } else {
-                false
+    }
+
+    private fun saveChanges() {
+        val newName = editTextCurrentName.text.toString()
+        val newUsername = editTextCurrentUserName.text.toString()
+        val newEmail = editTextCurrentEmail.text.toString()
+        val newPassword = editTextCurrentPassword.text.toString()
+
+        val isNameChanged = newName != old_name
+        val isUsernameChanged = newUsername != old_username
+        val isEmailChanged = newEmail != old_email
+        val isPasswordChanged = newPassword != "*****"
+
+        if ((isNameChanged or isUsernameChanged or isEmailChanged) and !isPasswordChanged) {
+            if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail)) {
+                disableInputs()
+                changeCredentials(name = newName, username = newUsername, email = newEmail)
+            }
+        } else if (!isNameChanged and !isUsernameChanged and !isEmailChanged and isPasswordChanged) {
+            if (validatePassword(newPassword)) {
+                disableInputs()
+                changePassword(password = newPassword)
+            }
+        } else if ((isNameChanged or isUsernameChanged or isEmailChanged) and isPasswordChanged) {
+            if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail) and validatePassword(newPassword)) {
+                disableInputs()
+                changePassword(password = newPassword)
+                changeCredentials(name = newName, username = newUsername, email = newEmail)
             }
         }
     }
 
-    private fun saveChanges() {
-        if (new_name != old_name || new_username != old_username || new_email != old_email && editTextCurrentPassword.text.toString() == "*****") {
-            frameProgress.visibility = View.VISIBLE
-            progressBar.visibility = View.VISIBLE
-            saveChangesButton.isEnabled = false
-            editTextCurrentName.isEnabled = false;
-            imageViewEditName.isEnabled = false;
-            editTextCurrentUserName.isEnabled = false;
-            imageViewEditUserName.isEnabled = false;
-            editTextCurrentPassword.isEnabled = false;
-            imageViewEditPassword.isEnabled = false;
-            editTextCurrentEmail.isEnabled = false;
-            imageViewEditEmail.isEnabled = false;
-            changeCredentials(name = new_name, username = new_username, email = new_email)
-        } else if (new_name == old_name && new_username == old_username && new_email == old_email && editTextCurrentPassword.text.toString() != "*****") {
-            val isPasswordValid: Boolean = validatePassword(editTextCurrentPassword.text.toString())
-            if (isPasswordValid) {
-                frameProgress.visibility = View.VISIBLE
-                progressBar.visibility = View.VISIBLE
-                saveChangesButton.isEnabled = false
-                editTextCurrentName.isEnabled = false;
-                imageViewEditName.isEnabled = false;
-                editTextCurrentUserName.isEnabled = false;
-                imageViewEditUserName.isEnabled = false;
-                editTextCurrentPassword.isEnabled = false;
-                imageViewEditPassword.isEnabled = false;
-                editTextCurrentEmail.isEnabled = false;
-                imageViewEditEmail.isEnabled = false;
-                var new_password = editTextCurrentPassword.text.toString()
-                changePassword(password = new_password)
-            }
-        } else if (new_name != old_name || new_username != old_username || new_email != old_email && editTextCurrentPassword.text.toString() != "*****") {
-            val isPasswordValid: Boolean = validatePassword(editTextCurrentPassword.text.toString())
-            if (isPasswordValid) {
-                frameProgress.visibility = View.VISIBLE
-                progressBar.visibility = View.VISIBLE
-                saveChangesButton.isEnabled = false
-                editTextCurrentName.isEnabled = false;
-                imageViewEditName.isEnabled = false;
-                editTextCurrentUserName.isEnabled = false;
-                imageViewEditUserName.isEnabled = false;
-                editTextCurrentPassword.isEnabled = false;
-                imageViewEditPassword.isEnabled = false;
-                editTextCurrentEmail.isEnabled = false;
-                imageViewEditEmail.isEnabled = false;
-                var new_password = editTextCurrentPassword.text.toString()
-                changePassword(password = new_password)
-                changeCredentials(name = new_name, username = new_username, email = new_email)
-            }
-        }
+    private fun disableInputs() {
+        frameProgress.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
+        saveChangesButton.isEnabled = false
+        editTextCurrentName.isEnabled = false
+        imageViewEditName.isEnabled = false
+        editTextCurrentUserName.isEnabled = false
+        imageViewEditUserName.isEnabled = false
+        editTextCurrentPassword.isEnabled = false
+        imageViewEditPassword.isEnabled = false
+        editTextCurrentEmail.isEnabled = false
+        imageViewEditEmail.isEnabled = false
     }
+
 
     private fun changePassword(password: String) {
         val url = getString(R.string.changePasswordURL) + "/$user_id"
@@ -259,7 +183,7 @@ class Settings : AppCompatActivity() {
             Method.PUT, url,
             Response.Listener { response ->
                 try {
-                    Log.d("APP_REST",  handleUpdateUserResponse(response).toString())
+                    Log.d("APP_REST",  "changed password"+response)
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
                     saveChangesButton.isEnabled = true
@@ -410,7 +334,6 @@ class Settings : AppCompatActivity() {
                 }
                 showError(errorMessage)
                 Log.d("APP_REST", error.toString())
-                Log.d("APP_REST", error.networkResponse.statusCode.toString())
                 frameProgress.visibility = View.GONE
                 progressBar.visibility = View.GONE
                 saveChangesButton.isEnabled = true
@@ -438,6 +361,14 @@ class Settings : AppCompatActivity() {
             override fun getBody(): ByteArray {
                 return requestBody.toByteArray(Charset.defaultCharset())
             }
+
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                )
+            }
         }
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(stringRequest)
@@ -449,9 +380,15 @@ class Settings : AppCompatActivity() {
         val gson = builder.create()
         try {
             val res: ChangeUserData = gson.fromJson(response, ChangeUserData::class.java)
-            val fragmentManager = supportFragmentManager
-            val profileFragment = fragmentManager.findFragmentById(R.id.ContentframeLayout) as? Profile
-            profileFragment?.updateLabels(nameUpdated = res.name, usernameUpdated = res.username, emailUpdated = res.email)
+
+            val mainPageNavIntent = Intent(this, MainPageNav::class.java)
+            mainPageNavIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            mainPageNavIntent.putExtra("user_id", res.id)
+            mainPageNavIntent.putExtra("username", res.username)
+            mainPageNavIntent.putExtra("token", token)
+            mainPageNavIntent.putExtra("name", res.name)
+            mainPageNavIntent.putExtra("email", res.email)
+            startActivity(mainPageNavIntent)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST", e.toString())
         }
@@ -464,7 +401,7 @@ class Settings : AppCompatActivity() {
     }
 
     private fun validateName(name: String): Boolean {
-        val namePattern = Regex("^[a-zA-Z ]{2,30}\$")
+        val namePattern = Regex("^[a-zA-ZÀ-ÖØ-öø-ÿ ]{2,30}\$")
         if (name.isBlank()) {
             labelValidation.setTextColor(Color.RED)
             labelValidation.text = "Please fill the input fields"

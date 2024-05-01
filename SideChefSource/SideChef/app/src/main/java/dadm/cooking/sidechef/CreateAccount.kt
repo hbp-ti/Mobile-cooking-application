@@ -84,12 +84,12 @@ class CreateAccount : AppCompatActivity() {
     }
 
     private fun validateCredentials(name: String, email: String, username: String, password: String, confirmPassword: String): Boolean {
-        val namePattern = Regex("^[a-zA-Z ]{2,30}\$")
+        val namePattern = Regex("^[a-zA-ZÀ-ÖØ-öø-ÿ ]{2,30}\$")
         val emailPattern = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$")
         val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
         val passwordPattern = Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|<>?{}\\[\\]~])(?!.*\\s).{8,}\$")
 
-        if (name.isBlank() || email.isBlank() || username.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+        if (name.isBlank() or email.isBlank() or username.isBlank() or password.isBlank() or confirmPassword.isBlank()) {
             labelValidation.setTextColor(Color.RED)
             labelValidation.text = "Please fill the input fields"
             labelValidation.visibility = View.VISIBLE
