@@ -73,11 +73,6 @@ class Profile : Fragment() {
         setupView(view, savedInstanceState)
     }
 
-    override fun onStop() {
-        super.onStop()
-        deleteProfileData()
-    }
-
     private fun setupView(view: View, savedInstanceState: Bundle?) {
         myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
         settingsButton = view.findViewById(R.id.buttonSettings)
@@ -94,29 +89,18 @@ class Profile : Fragment() {
         }
 
         logoutButton.setOnClickListener {
-            deleteProfileData()
             deleteKeeplogin()
             changeToLogIn()
-        }
 
-        val (nameSaved, usernameSaved, emailSaved) = loadProfileData()
-
-        if (nameSaved != null && usernameSaved != null && emailSaved != null) {
-            name = nameSaved
-            username = usernameSaved
-            email = emailSaved
-            user_id = requireActivity().intent.getIntExtra("user_id", 0)
-            token = requireActivity().intent.getStringExtra("token").toString()
-        } else {
             user_id = requireActivity().intent.getIntExtra("user_id", 0)
             username = requireActivity().intent.getStringExtra("username").toString()
             token = requireActivity().intent.getStringExtra("token").toString()
             name = requireActivity().intent.getStringExtra("name").toString()
             email = requireActivity().intent.getStringExtra("email").toString()
-        }
 
-        name_label.text = name
-        username_label.text = username
+            name_label.text = name
+            username_label.text = username
+        }
     }
 
     private fun changeToMyRecipes() {
@@ -143,37 +127,6 @@ class Profile : Fragment() {
     private fun deleteKeeplogin() {
         val sharedPref = requireActivity().getSharedPreferences(R.string.userLogInFile.toString(), Context.MODE_PRIVATE)
         sharedPref.edit().remove(R.string.keepLoginKey.toString()).apply()
-    }
-
-    fun updateLabels(nameUpdated: String, usernameUpdated: String, emailUpdated: String) {
-        Log.d("APP_REST", "INSIDE UPDATE LABELS: $nameUpdated + $usernameUpdated + $emailUpdated")
-        saveProfileData(name = nameUpdated, username = usernameUpdated, email = emailUpdated)
-        name = nameUpdated
-        username = usernameUpdated
-        email = emailUpdated
-        name_label.text = nameUpdated
-        username_label.text = usernameUpdated
-    }
-
-
-    private fun loadProfileData(): Triple<String?, String?, String?> {
-        val sharedPref = requireActivity().getSharedPreferences(R.string.ProfileData.toString(), Context.MODE_PRIVATE)
-        val name = sharedPref.getString("name", null)
-        val username = sharedPref.getString("username", null)
-        val email = sharedPref.getString("email", null)
-        return Triple(name, username, email)
-    }
-
-    private fun saveProfileData(name: String, username: String, email: String) {
-        val sharedPref = requireActivity().getSharedPreferences(R.string.ProfileData.toString(), Context.MODE_PRIVATE)
-        sharedPref.edit().putString("name", name).apply()
-        sharedPref.edit().putString("username", username).apply()
-        sharedPref.edit().putString("email", email).apply()
-    }
-
-    private fun deleteProfileData() {
-        val sharedPref = requireActivity().getSharedPreferences(R.string.ProfileData.toString(), Context.MODE_PRIVATE)
-        sharedPref.edit().clear().apply()
     }
 
     companion object {
