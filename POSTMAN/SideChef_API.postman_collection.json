@@ -1,0 +1,556 @@
+{
+	"info": {
+		"_postman_id": "70a1746a-22eb-4ce8-86da-7d1bec6c8781",
+		"name": "SideChef_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32991569"
+	},
+	"item": [
+		{
+			"name": "getUser",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/getUser/hugo004_",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"getUser",
+						"hugo004_"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"hugo bessa\",\r\n    \"email\": \"hugo2004@gmail.com\",\r\n    \"username\": \"hugo004_\",\r\n    \"password\": \"hugobessa55\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/register",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"hugo\",\r\n    \"password\": \"whudwqhdqwh\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/login",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "changeUser",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"New Name\",\r\n    \"email\": \"new_email@example.com\",\r\n    \"username\": \"new_username\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/changeUser/2",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"changeUser",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "changePassword",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Passwopd\": \"asdasdsa\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/changePassword/2",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"changePassword",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRecipe",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/getRecipe/2",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"getRecipe",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getSavedRecipes",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/getSavedRecipes_user/2",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"getSavedRecipes_user",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addRecipe",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"string\",\r\n    \"preparation\": \"string\",\r\n    \"prepTime\": \"string\",\r\n    \"type\": \"string\",\r\n    \"picture\": \"string\",\r\n    \"ingredients\": \"string\",\r\n    \"idUser\": 0,\r\n    \"idRec\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/addRecipe",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"addRecipe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteRecipe",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3MTQ1MTA0MjF9.k4Ne5RRNXpYMcdhTa7kCGjRmeUWBSG1c82fXMJWzDHA",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/deleteRecipe/2",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"deleteRecipe",
+						"2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
