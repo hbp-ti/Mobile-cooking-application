@@ -68,12 +68,13 @@
 						"getUser",
 						"hugo004_"
 					]
-				}
+				},
+				"description": "This endpoint makes an HTTP GET request to retrieve user data for for a user from the SideChef API.\n\n### Request\n\nThe request does not include a request body. The user identifier \"username\" is included as a path parameter in the request URL.\n\n- Path parameter:\n    - username (string): The unique identifier of the user for whom the data is being retrieved.\n\n### Response\n\nThe response will contain the user data in the JSON format, including details such as user ID, name, email, and any other relevant user information."
 			},
 			"response": []
 		},
 		{
-			"name": "addUser",
+			"name": "register",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -97,7 +98,8 @@
 					"path": [
 						"register"
 					]
-				}
+				},
+				"description": "\nThe `POST /register` endpoint is used to register a new user on the Sidechef API.\n\n### Request Body\n- `name` (string, required): The name of the user.\n- `email` (string, required): The email address of the user.\n- `username` (string, required): The username chosen by the user.\n- `password` (string, required): The password for the user account.\n\n### Response\nThe response of this request is a JSON schema representing the structure of the response data. The specific structure of the response will be defined in the JSON schema format.\n"
 			},
 			"response": []
 		},
@@ -126,7 +128,8 @@
 					"path": [
 						"login"
 					]
-				}
+				},
+				"description": "### Login\n\nThis endpoint is used to authenticate and log in the user.\n\n#### Request Body\n\n- `username` (string, required): The username of the user.\n- `password` (string, required): The password of the user.\n    \n\n#### Response\n\nThe response will include the authentication token and user details upon successful login."
 			},
 			"response": []
 		},
@@ -201,7 +204,8 @@
 						"changeUser",
 						"2"
 					]
-				}
+				},
+				"description": "### Change User Details\n\nThis endpoint allows the user to update their details.\n\n#### Request\n\n- Method: PUT\n- URL: `https://sidechef-api.vercel.app/changeUser/2`\n    \n\n##### Request Body\n\n- Type: JSON\n    - `name` (string, optional): The updated name of the user.\n    - `email` (string, optional): The updated email of the user.\n    - `username` (string, optional): The updated username of the user.\n\n#### Response\n\nThe response for this request is not provided. However, the response can be expected to be in the JSON format.\n\n#### JSON Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
 			},
 			"response": []
 		},
@@ -276,7 +280,8 @@
 						"changePassword",
 						"2"
 					]
-				}
+				},
+				"description": "### Change Password\n\nThis endpoint is used to update the password for a specific user.\n\n#### Request Body\n\n- `Password` (string, required): The new password for the user.\n    \n\n#### Response\n\nThe response will include the updated user information if the password change is successful."
 			},
 			"response": []
 		},
@@ -342,7 +347,8 @@
 						"getRecipe",
 						"2"
 					]
-				}
+				},
+				"description": "### Get Recipe Details\n\nThis endpoint makes an HTTP GET request to retrieve the details of a specific recipe.\n\n#### Response\n\nThe response for this request is a JSON object with the following schema:\n\n``` json\n{\n  \"recipeId\": \"string\",\n  \"recipeName\": \"string\",\n  \"ingredients\": [\"string\"],\n  \"instructions\": [\"string\"],\n  \"prepTime\": \"string\",\n  \"cookTime\": \"string\",\n  \"totalTime\": \"string\",\n  \"servings\": \"string\",\n  \"calories\": \"string\",\n  \"imageUrl\": \"string\",\n  \"chefName\": \"string\",\n  \"chefId\": \"string\"\n}\n\n ```"
 			},
 			"response": []
 		},
@@ -408,7 +414,8 @@
 						"getSavedRecipes_user",
 						"2"
 					]
-				}
+				},
+				"description": "\nThis endpoint makes an HTTP GET request to retrieve the saved recipes for a specific user. The request does not include a request body, as it is a simple GET request. The response will include the details of the saved recipes for the specified user.\n"
 			},
 			"response": []
 		},
@@ -482,7 +489,8 @@
 					"path": [
 						"addRecipe"
 					]
-				}
+				},
+				"description": "This API endpoint allows you to add a new recipe by sending an HTTP POST request to the specified URL. The request should include a JSON payload in the raw request body, with the following parameters:\n\n- `name` (string): The name of the recipe.\n- `preparation` (string): The preparation instructions for the recipe.\n- `prepTime` (string): The preparation time required for the recipe.\n- `type` (string): The type or category of the recipe.\n- `picture` (string): The picture URL of the recipe.\n- `ingredients` (string): The list of ingredients required for the recipe.\n- `idUser` (number): The user ID associated with the recipe.\n- `idRec` (number): The recipe ID.\n    \n\nUpon successful submission, the API will return a response with the relevant details of the newly added recipe."
 			},
 			"response": []
 		},
@@ -548,7 +556,69 @@
 						"deleteRecipe",
 						"2"
 					]
-				}
+				},
+				"description": "### Delete Recipe\n\nThis endpoint is used to delete a specific recipe with the given ID.\n\n#### Request Body\n\nThis request does not require a request body.\n\n#### Response\n\nThe response will indicate the success or failure of the deletion operation."
+			},
+			"response": []
+		},
+		{
+			"name": "Get all recipes",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{\r\n    \"Authorization\": \"\"\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "payload",
+							"value": "{}",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sidechef-api.vercel.app/getAllRecipes",
+					"protocol": "https",
+					"host": [
+						"sidechef-api",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"getAllRecipes"
+					]
+				},
+				"description": "This endpoint sends an HTTP GET request to retrieve all recipes from the SideChef API. The response of this request can be documented as a JSON schema to provide a structured description of the data format and types returned by the API."
 			},
 			"response": []
 		}

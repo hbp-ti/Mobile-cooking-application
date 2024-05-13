@@ -17,8 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.NetworkError
 import com.android.volley.Response
+import com.android.volley.RetryPolicy
 import com.android.volley.ServerError
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
@@ -28,12 +30,17 @@ import com.google.gson.JsonSyntaxException
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
+import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
+import androidx.security.crypto.MasterKey
+import java.io.IOException
+import java.security.GeneralSecurityException
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var signUpLink: TextView
-    private lateinit var forgotPass: TextView
     private lateinit var buttonLogIn: Button
     private lateinit var usernameInput: EditText
     private lateinit var passwordInput: EditText
@@ -41,14 +48,25 @@ class MainActivity : AppCompatActivity() {
     private lateinit var keeploginBox: CheckBox
     private lateinit var progressBar: ProgressBar
     private lateinit var frameProgress: FrameLayout
+    private var id: Int = 0
+    private lateinit var email: String
+    private lateinit var name: String
+    private lateinit var username: String
+    private lateinit var password: String
     private lateinit var token: String
+    private val DEFAULT_BACKOFF_MULT: Float = 1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val loginkept: Boolean = keepLogin()
-        if (loginkept) {
+        val (idLoaded, nameLoaded, emailLoaded, tokenLoaded, usernameLoaded) = loadDataLogIn(this)
+        if (idLoaded != null && nameLoaded != null && emailLoaded != null && tokenLoaded != null && usernameLoaded != null) {
             val intent = Intent(this, MainPageNav::class.java)
+            intent.putExtra("user_id", idLoaded)
+            intent.putExtra("username", usernameLoaded)
+            intent.putExtra("token", tokenLoaded)
+            intent.putExtra("email", emailLoaded)
+            intent.putExtra("name", nameLoaded)
             startActivity(intent)
         } else {
             setContentView(R.layout.activity_main)
@@ -68,10 +86,7 @@ class MainActivity : AppCompatActivity() {
         signUpLink.setOnClickListener {
             changeToSignUp()
         }
-        forgotPass = findViewById(R.id.forgotPassLabel)
-        forgotPass.setOnClickListener {
-            changeToForgotPassword()
-        }
+
         buttonLogIn = findViewById(R.id.buttonLogIn)
         usernameInput = findViewById(R.id.usernameInput)
         passwordInput = findViewById(R.id.passwordInput)
@@ -86,14 +101,8 @@ class MainActivity : AppCompatActivity() {
                 usernameInput.isEnabled = false
                 passwordInput.isEnabled = false
                 keeploginBox.isEnabled = false
-                forgotPass.isEnabled = false
                 signUpLink.isEnabled = false
-                if (keeploginBox.isChecked) {
-                    saveLogin(true)
-                    login(username = usernameInput.text.toString(), pass = passwordInput.text.toString())
-                } else {
-                    login(username = usernameInput.text.toString(), pass = passwordInput.text.toString())
-                }
+                login(username = usernameInput.text.toString(), pass = passwordInput.text.toString())
             }
         }
     }
@@ -144,7 +153,6 @@ class MainActivity : AppCompatActivity() {
                     usernameInput.isEnabled = true
                     passwordInput.isEnabled = true
                     keeploginBox.isEnabled = true
-                    forgotPass.isEnabled = true
                     signUpLink.isEnabled = true
                 }
             },
@@ -177,9 +185,17 @@ class MainActivity : AppCompatActivity() {
                 usernameInput.isEnabled = true
                 passwordInput.isEnabled = true
                 keeploginBox.isEnabled = true
-                forgotPass.isEnabled = true
                 signUpLink.isEnabled = true
             }) {
+
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DEFAULT_BACKOFF_MULT
+                )
+            }
+
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -198,8 +214,10 @@ class MainActivity : AppCompatActivity() {
         val gson = builder.create()
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
+            id = res.id
             token = res.token
-            saveToken(res.token)
+            username = res.username
+            password = passwordInput.text.toString()
             getUserInfo(res.id)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -208,7 +226,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun getUserInfo(id_user: Int) {
         val url = getString(R.string.getuserURL) + "/$id_user"
-
         val stringRequest: StringRequest = object : StringRequest(
             Method.GET, url,
             Response.Listener { response ->
@@ -226,7 +243,6 @@ class MainActivity : AppCompatActivity() {
                     usernameInput.isEnabled = true
                     passwordInput.isEnabled = true
                     keeploginBox.isEnabled = true
-                    forgotPass.isEnabled = true
                     signUpLink.isEnabled = true
                 }
             },
@@ -250,7 +266,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     else -> "Unknown error"
                 }
-
+                showError(errorMessage)
                 Log.d("APP_REST", error.toString())
                 Log.d("APP_REST", error.networkResponse.statusCode.toString())
                 buttonLogIn.isEnabled = true
@@ -259,9 +275,9 @@ class MainActivity : AppCompatActivity() {
                 usernameInput.isEnabled = true
                 passwordInput.isEnabled = true
                 keeploginBox.isEnabled = true
-                forgotPass.isEnabled = true
                 signUpLink.isEnabled = true
             }) {
+
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -272,6 +288,15 @@ class MainActivity : AppCompatActivity() {
                 headers["Authorization"] = "Bearer $token"
                 return headers
             }
+
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DEFAULT_BACKOFF_MULT
+                )
+            }
+
         }
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(stringRequest)
@@ -281,9 +306,15 @@ class MainActivity : AppCompatActivity() {
         val builder = GsonBuilder()
         builder.setPrettyPrinting()
         val gson = builder.create()
+
         try {
             val res: GetUserProfileData = gson.fromJson(response, GetUserProfileData::class.java)
-            changeToMainPage(id = res.id, username = res.username, token = token, name = res.name, email = res.email)
+            email = res.email
+            name = res.name
+            if (keeploginBox.isChecked) {
+                saveDataLogIn(context = this,username = username, password = password, token = token, id = id, email = email, name = name)
+            }
+            changeToMainPage(id = id, username = username, token = token, name = name, email = email)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
@@ -299,11 +330,6 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, CreateAccount::class.java)
         startActivity(intent)
         finish()
-    }
-
-    private fun changeToForgotPassword() {
-        val intent = Intent(this, ResetPassword::class.java)
-        startActivity(intent)
     }
 
     private fun changeToMainPage(id: Int, username: String, token: String, name: String, email: String) {
@@ -322,14 +348,66 @@ class MainActivity : AppCompatActivity() {
         return sharedPref.getBoolean(R.string.keepLoginKey.toString(), false)
     }
 
-    private fun saveLogin(saveLogIn: Boolean) {
-        val sharedPref = getSharedPreferences(R.string.userLogInFile.toString(), Context.MODE_PRIVATE)
-        sharedPref.edit().putBoolean(R.string.keepLoginKey.toString(), saveLogIn).apply()
+    private fun saveDataLogIn(context: Context, username: String, password: String, token: String, id: Int, email: String, name: String) {
+
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            val editor = sharedPref.edit()
+            editor.putInt(context.getString(R.string.idKey), id)
+            editor.putString(context.getString(R.string.nameKey), name)
+            editor.putString(context.getString(R.string.emailKey), email)
+            editor.putString(context.getString(R.string.tokenKey), token)
+            editor.putString(context.getString(R.string.usernameKey), username)
+            editor.putString(context.getString(R.string.passwordKey), password)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
-    private fun saveToken(token: String) {
-        val sharedPref = getSharedPreferences(getString(R.string.userLogInFile), Context.MODE_PRIVATE)
-        sharedPref.edit().putString(getString(R.string.tokenKeyFile), token).apply()
+    private fun loadDataLogIn(context: Context): UserData {
+        var token: String? = null
+        var username: String? = null
+        var name: String? = null
+        var email: String? = null
+        var id: Int? = null
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            id = sharedPref.getInt(context.getString(R.string.idKey), -1)
+            name = sharedPref.getString(context.getString(R.string.nameKey), null)
+            email = sharedPref.getString(context.getString(R.string.emailKey), null)
+            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
+            username = sharedPref.getString(context.getString(R.string.usernameKey), null)
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return UserData(id, name, email, token, username)
     }
 
 }

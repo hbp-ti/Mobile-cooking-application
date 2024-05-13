@@ -26,6 +26,12 @@ import com.google.gson.JsonSyntaxException
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
+import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
+import androidx.security.crypto.MasterKey
+import java.io.IOException
+import java.security.GeneralSecurityException
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,6 +86,15 @@ class Profile : Fragment() {
         name_label = view.findViewById(R.id.nameUser)
         username_label = view.findViewById(R.id.username)
 
+        user_id = requireActivity().intent.getIntExtra("user_id", 0)
+        username = requireActivity().intent.getStringExtra("username").toString()
+        token = requireActivity().intent.getStringExtra("token").toString()
+        name = requireActivity().intent.getStringExtra("name").toString()
+        email = requireActivity().intent.getStringExtra("email").toString()
+
+        name_label.text = name
+        username_label.text = username
+
         myrecipesButton.setOnClickListener {
             changeToMyRecipes()
         }
@@ -89,22 +104,42 @@ class Profile : Fragment() {
         }
 
         logoutButton.setOnClickListener {
-            deleteKeeplogin()
+            deleteDataLogIn(requireActivity())
             changeToLogIn()
+        }
+    }
 
-            user_id = requireActivity().intent.getIntExtra("user_id", 0)
-            username = requireActivity().intent.getStringExtra("username").toString()
-            token = requireActivity().intent.getStringExtra("token").toString()
-            name = requireActivity().intent.getStringExtra("name").toString()
-            email = requireActivity().intent.getStringExtra("email").toString()
+    private fun deleteDataLogIn(context: Context) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
 
-            name_label.text = name
-            username_label.text = username
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            val editor = sharedPref.edit()
+            editor.clear()
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 
     private fun changeToMyRecipes() {
         val intent = Intent(requireActivity(), MyRecipes::class.java)
+        intent.putExtra("user_id", user_id)
+        intent.putExtra("username", username)
+        intent.putExtra("name", name)
+        intent.putExtra("email", email)
+        intent.putExtra("token", token)
         startActivity(intent)
     }
 
@@ -122,11 +157,6 @@ class Profile : Fragment() {
         val intent = Intent(requireActivity(), MainActivity::class.java)
         startActivity(intent)
         requireActivity().finish()
-    }
-
-    private fun deleteKeeplogin() {
-        val sharedPref = requireActivity().getSharedPreferences(R.string.userLogInFile.toString(), Context.MODE_PRIVATE)
-        sharedPref.edit().remove(R.string.keepLoginKey.toString()).apply()
     }
 
     companion object {

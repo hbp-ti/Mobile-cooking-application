@@ -1,6 +1,7 @@
 package dadm.cooking.sidechef
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -35,6 +36,12 @@ import com.google.gson.JsonSyntaxException
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
+import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
+import androidx.security.crypto.MasterKey
+import java.io.IOException
+import java.security.GeneralSecurityException
 
 class Settings : AppCompatActivity() {
 
@@ -59,6 +66,7 @@ class Settings : AppCompatActivity() {
     private lateinit var old_name: String
     private lateinit var old_username: String
     private lateinit var old_email: String
+    private val DEFAULT_BACKOFF_MULT: Float = 1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,6 +190,7 @@ class Settings : AppCompatActivity() {
         val stringRequest: StringRequest = object : StringRequest(
             Method.PUT, url,
             Response.Listener { response ->
+                updatePasswordDataLogIn(context = this, password = password)
                 try {
                     Log.d("APP_REST",  "changed password"+response)
                     frameProgress.visibility = View.GONE
@@ -249,6 +258,14 @@ class Settings : AppCompatActivity() {
                 imageViewEditEmail.isEnabled = true;
 
             }) {
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DEFAULT_BACKOFF_MULT
+                )
+            }
+
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -281,6 +298,7 @@ class Settings : AppCompatActivity() {
             Method.PUT, url,
             Response.Listener { response ->
                 try {
+                    updateDataLogIn(context = this, name = name, username = username, email = email)
                     handleUpdateUserResponse(response)
                     Log.d("APP_REST",  handleUpdateUserResponse(response).toString())
                     frameProgress.visibility = View.GONE
@@ -366,7 +384,7 @@ class Settings : AppCompatActivity() {
                 return DefaultRetryPolicy(
                     20000,
                     DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                    DEFAULT_BACKOFF_MULT
                 )
             }
         }
@@ -471,6 +489,61 @@ class Settings : AppCompatActivity() {
             return true
         }
     }
+
+    private fun updateDataLogIn(context: Context, name: String, email: String, username: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            val editor = sharedPref.edit()
+
+            editor.putString(context.getString(R.string.nameKey), name)
+            editor.putString(context.getString(R.string.emailKey), email)
+            editor.putString(context.getString(R.string.usernameKey), username)
+
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updatePasswordDataLogIn(context: Context, password: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            val editor = sharedPref.edit()
+
+            editor.putString(context.getString(R.string.passwordKey), password)
+
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
 
     private fun changeToProfile() {
         finish()

@@ -45,6 +45,11 @@ class Search : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         searchBar = view.findViewById(R.id.search_bar)
+        setupView()
+    }
+
+    private fun setupView() {
+
         val searchEditText = searchBar.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
         searchEditText.setTextColor(requireContext().getColor(R.color.black))
 

@@ -130,8 +130,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
-        android:text="Keep me logged in"
         android:fontFamily="@font/inter_bold"
+        android:text="Keep me logged in"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -140,35 +140,22 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonLogIn" />
 
     <TextView
-        android:id="@+id/forgotPassLabel"
+        android:id="@+id/dontHaveAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/inter_bold"
-        android:text="Forgot Password?"
-        android:textColor="@color/darkOrange"
+        android:layout_marginTop="26dp"
+        android:text="Don't have an account?"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/checkBoxKeepLogIn" />
 
     <TextView
-        android:id="@+id/dontHaveAccount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Don't have an account?"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgotPassLabel" />
-
-    <TextView
         android:id="@+id/signUpLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:fontFamily="@font/inter_bold"
         android:text="Sign Up"
         android:textColor="@color/darkOrange"

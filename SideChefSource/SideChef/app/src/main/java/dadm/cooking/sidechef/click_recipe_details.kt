@@ -9,6 +9,13 @@ import androidx.core.view.WindowInsetsCompat
 
 class click_recipe_details : AppCompatActivity() {
     private lateinit var backButton: ImageButton
+    private var recipeId: Int = 0
+    private lateinit var recipeName: String
+    private lateinit var recipePreparation: String
+    private lateinit var recipePrepTime: String
+    private lateinit var recipeType: String
+    private lateinit var recipeImage: String
+    private lateinit var recipeIngredients: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +34,15 @@ class click_recipe_details : AppCompatActivity() {
         backButton.setOnClickListener {
             changeToMainActivity()
         }
+
+        recipeId = intent.getIntExtra("recipe_id", 0)
+        recipeName = intent.getStringExtra("recipe_name") ?: ""
+        recipePreparation = intent.getStringExtra("recipe_preparation") ?: ""
+        recipePrepTime = intent.getStringExtra("recipe_prepTime") ?: ""
+        recipeType = intent.getStringExtra("recipe_type") ?: ""
+        recipeImage = intent.getStringExtra("recipe_picture") ?: ""
+        recipeIngredients = intent.getStringExtra("recipe_ingredients") ?: ""
+
     }
 
     private fun changeToMainActivity() {

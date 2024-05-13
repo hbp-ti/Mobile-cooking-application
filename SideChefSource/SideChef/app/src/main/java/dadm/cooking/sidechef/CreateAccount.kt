@@ -15,14 +15,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.NetworkError
 import com.android.volley.Response
+import com.android.volley.RetryPolicy
 import com.android.volley.ServerError
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
@@ -39,6 +39,7 @@ class CreateAccount : AppCompatActivity() {
     private lateinit var labelValidation: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var frameProgress: FrameLayout
+    private val DEFAULT_BACKOFF_MULT: Float = 1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -144,7 +145,7 @@ class CreateAccount : AppCompatActivity() {
                     changeToSignIn()
                 } catch (e: JSONException) {
                     e.printStackTrace()
-                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    Log.d("APP_REST","JSONException" + e.printStackTrace())
                     signUpButton.isEnabled = true
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
@@ -191,6 +192,14 @@ class CreateAccount : AppCompatActivity() {
                 inputConfirmPassword.isEnabled = true
                 signInLink.isEnabled = true
             }) {
+
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DEFAULT_BACKOFF_MULT
+                )
+            }
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }

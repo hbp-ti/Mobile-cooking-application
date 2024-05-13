@@ -7,6 +7,15 @@
     <string name="getuserURL">https://sidechef-api.vercel.app/getUser</string>
     <string name="changeUserURL">https://sidechef-api.vercel.app/changeUser</string>
     <string name="changePasswordURL">https://sidechef-api.vercel.app/changePassword</string>
+    <string name="getRecipesURL">https://sidechef-api.vercel.app/getAllRecipes</string>
+    <string name="getSavedRecipesURL">https://sidechef-api.vercel.app/getSavedRecipes_user</string>
+    <string name="removeRecipeURL">https://sidechef-api.vercel.app/deleteRecipe</string>
+    <string name="addRecipeURL">https://sidechef-api.vercel.app/addRecipe</string>
     <string name="ProfileData">profileDataUpdated</string>
-    <string name="tokenKeyFile">tokenKey</string>
+    <string name="tokenKey">tokenKey</string>
+    <string name="usernameKey">usernameKey</string>
+    <string name="passwordKey">passwordKey</string>
+    <string name="idKey">idKey</string>
+    <string name="emailKey">emailKey</string>
+    <string name="nameKey">nameKey</string>
 </resources>
