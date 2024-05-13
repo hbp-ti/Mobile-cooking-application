@@ -40,6 +40,9 @@ class Home_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseDa
         }
 
         holder.recipeImage.setOnClickListener {
+            // Parar a propagaçao para o pai (itemview)
+            it?.parent?.requestDisallowInterceptTouchEvent(true)
+
             onImageClick?.invoke(recipe)
             holder.favoritedIcon.setColorFilter(ContextCompat.getColor(holder.itemView.context, R.color.redLogOut), PorterDuff.Mode.SRC_IN)
         }

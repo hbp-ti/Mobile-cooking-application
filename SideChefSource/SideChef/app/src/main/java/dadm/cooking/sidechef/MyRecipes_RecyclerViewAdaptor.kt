@@ -43,6 +43,9 @@ class MyRecipes_RecyclerViewAdaptor(private val context: Context, private var re
         }
 
         holder.recipeImage.setOnClickListener {
+            // Parar a propagaçao para o pai (itemview)
+            it?.parent?.requestDisallowInterceptTouchEvent(true)
+
             onImageClick?.invoke(recipe)
 
             recipeList.removeAt(holder.adapterPosition)
