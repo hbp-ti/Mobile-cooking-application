@@ -92,7 +92,7 @@ class MyRecipes : AppCompatActivity() {
             Method.GET, url,
             Response.Listener { response ->
                 try {
-                    handleGetRecipesResponse(response)
+                    handleGetSavedRecipesResponse(response)
                     progressBar.visibility = View.GONE
                     frameProgress.visibility = View.GONE
                     backButton.isEnabled = true
@@ -141,7 +141,7 @@ class MyRecipes : AppCompatActivity() {
         requestQueue.add(stringRequest)
     }
 
-    private fun handleGetRecipesResponse(response: String) {
+    private fun handleGetSavedRecipesResponse(response: String) {
         val builder = GsonBuilder()
         builder.setPrettyPrinting()
         val gson = builder.create()
@@ -160,11 +160,12 @@ class MyRecipes : AppCompatActivity() {
                 intent.putExtra("recipe_type", recipe.type)
                 intent.putExtra("recipe_picture", recipe.picture)
                 intent.putExtra("recipe_ingredients", recipe.ingredients)
-                intent.putExtra("fk_recipe_id", recipe.idRecipe)
+                intent.putExtra("fk_recipe_id", recipe.id_recipe)
             }
 
             adapter.onImageClick = { recipe ->
-                removeFavoriteRecipe(recipe_id = recipe.idRecipe, token = token)
+                id_recipe_remove = recipe.id
+                removeFavoriteRecipe(recipe_id = recipe.id, token = token)
             }
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())

@@ -35,7 +35,7 @@ class MyRecipes_RecyclerViewAdaptor(private val context: Context, private var re
         holder.recipeTitle.text = recipe.name
         holder.recipeType.text = recipe.type
         holder.recipeTime.text = recipe.prepTime.toString()
-        holder.recipe_Fk = recipe.idRecipe
+        holder.recipe_Fk = recipe.id_recipe
         holder.favoritedIcon.setColorFilter(ContextCompat.getColor(context, R.color.redLogOut), PorterDuff.Mode.SRC_IN)
 
         holder.itemView.setOnClickListener {

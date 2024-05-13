@@ -10,5 +10,5 @@ data class GetSavedRecipesResponseData(
     @SerializedName("type") val type : String,
     @SerializedName("picture") val picture : String,
     @SerializedName("ingredients") val ingredients : String,
-    @SerializedName("idRecipe") val idRecipe : Int,
+    @SerializedName("id_recipe") val id_recipe : Int,
 )
