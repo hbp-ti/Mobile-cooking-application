@@ -11,8 +11,10 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -73,7 +75,7 @@ class MyRecipes : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         user_id = intent.getIntExtra("user_id", 0)
         username = intent.getStringExtra("username").toString()
-        token = intent.getStringExtra("token").toString()
+        token = loadToken(context = this).toString()
         name = intent.getStringExtra("name").toString()
         email = intent.getStringExtra("email").toString()
         progressBar.visibility = View.VISIBLE
@@ -149,6 +151,9 @@ class MyRecipes : AppCompatActivity() {
         try {
             val res: MutableList<GetSavedRecipesResponseData> = gson.fromJson(response, Array<GetSavedRecipesResponseData>::class.java).toMutableList()
             val adapter = MyRecipes_RecyclerViewAdaptor(context = this, recipeList = res)
+            val dividerItemDecoration = DividerItemDecoration(this , DividerItemDecoration.VERTICAL)
+            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(this , R.drawable.vertical_spacing_recycler)!!)
+            recyclerView.addItemDecoration(dividerItemDecoration)
             recyclerView.adapter = adapter
 
             adapter.onItemClick = { recipe ->
@@ -161,6 +166,7 @@ class MyRecipes : AppCompatActivity() {
                 intent.putExtra("recipe_picture", recipe.picture)
                 intent.putExtra("recipe_ingredients", recipe.ingredients)
                 intent.putExtra("fk_recipe_id", recipe.id_recipe)
+                startActivity(intent)
             }
 
             adapter.onImageClick = { recipe ->
@@ -203,14 +209,6 @@ class MyRecipes : AppCompatActivity() {
                 Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
             }) {
 
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -230,6 +228,7 @@ class MyRecipes : AppCompatActivity() {
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
+            SaveToken(context = this, tokenData = res.token)
             getSavedRecipes(idUser = user_id, token = token)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -322,14 +321,6 @@ class MyRecipes : AppCompatActivity() {
                 Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
             }) {
 
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -349,6 +340,7 @@ class MyRecipes : AppCompatActivity() {
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
+            SaveToken(context = this, tokenData = res.token)
             removeFavoriteRecipe(recipe_id = id_recipe_remove, token = token)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -378,6 +370,53 @@ class MyRecipes : AppCompatActivity() {
         }
 
         return password
+    }
+
+    private fun loadToken(context: Context): String? {
+        var token: String? = null
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return token
+    }
+
+    private fun SaveToken(context: Context, tokenData: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            val editor = sharedPref.edit()
+            editor.putString(context.getString(R.string.tokenKey), tokenData)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     private fun changeToProfile() {

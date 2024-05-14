@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.graphics.PorterDuff
+import android.util.Log
 import android.view.LayoutInflater
 
 class Home_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseData>): RecyclerView.Adapter<Home_RecyclerViewAdapter.ViewHolder>() {
@@ -30,16 +31,16 @@ class Home_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseDa
         holder.recipeId = recipe.id
 //        val decodedString: ByteArray = Base64.decode(recipeList[position].picture, Base64.DEFAULT)
 //        val decodedByte: Bitmap =  BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-//        holder.recipeImage.setImageBitmap(decodedByte)
+//        holder.recipeImage.setImageBitmap(decodedByte
         holder.recipeTitle.text = recipe.name
         holder.recipeType.text = recipe.type
-        holder.recipeTime.text = recipe.prepTime.toString()
-
+        holder.recipeTime.text = recipe.prepTime.toString()+"m"
+        Log.d("APP_ADAPTER", recipeList.toString())
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(recipe)
         }
 
-        holder.recipeImage.setOnClickListener {
+        holder.favoritedIcon.setOnClickListener {
             // Parar a propagaçao para o pai (itemview)
             it?.parent?.requestDisallowInterceptTouchEvent(true)
 
@@ -49,6 +50,7 @@ class Home_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseDa
     }
 
     override fun getItemCount(): Int {
+        Log.d("APP_ADAPTER", recipeList.size.toString())
         return recipeList.size
     }
 

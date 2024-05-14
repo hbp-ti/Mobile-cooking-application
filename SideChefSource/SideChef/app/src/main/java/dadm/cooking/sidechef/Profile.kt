@@ -82,13 +82,13 @@ class Profile : Fragment() {
     private fun setupView(view: View, savedInstanceState: Bundle?) {
         myrecipesButton = view.findViewById(R.id.buttonMyRecipes)
         settingsButton = view.findViewById(R.id.buttonSettings)
-        logoutButton = view.findViewById(R.id.buttonLogOut)
         name_label = view.findViewById(R.id.nameUser)
         username_label = view.findViewById(R.id.username)
+        logoutButton = view.findViewById(R.id.buttonLogOut)
 
         user_id = requireActivity().intent.getIntExtra("user_id", 0)
         username = requireActivity().intent.getStringExtra("username").toString()
-        token = requireActivity().intent.getStringExtra("token").toString()
+        token = loadToken(context = requireActivity()).toString()
         name = requireActivity().intent.getStringExtra("name").toString()
         email = requireActivity().intent.getStringExtra("email").toString()
 
@@ -104,12 +104,52 @@ class Profile : Fragment() {
         }
 
         logoutButton.setOnClickListener {
-            deleteDataLogIn(requireActivity())
+            deleteDataLogIn(context = requireActivity())
             changeToLogIn()
         }
     }
 
     private fun deleteDataLogIn(context: Context) {
+        try {
+            val fileName = context.getString(R.string.userLogInFile)
+
+            context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+
+    private fun changeToMyRecipes() {
+        val intent = Intent(requireActivity(), MyRecipes::class.java)
+        intent.putExtra("user_id", user_id)
+        intent.putExtra("username", username)
+        intent.putExtra("name", name)
+        intent.putExtra("email", email)
+        startActivity(intent)
+    }
+
+    private fun changeToSettings() {
+        val intent = Intent(requireActivity(), Settings::class.java)
+        intent.putExtra("user_id", user_id)
+        intent.putExtra("username", username)
+        intent.putExtra("name", name)
+        intent.putExtra("email", email)
+        startActivity(intent)
+    }
+
+    private fun changeToLogIn() {
+        val intent = Intent(requireActivity(), MainActivity::class.java)
+        startActivity(intent)
+        requireActivity().finish()
+    }
+
+    private fun loadToken(context: Context): String? {
+        var token: String? = null
         try {
             val masterKey = MasterKey.Builder(context)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -122,41 +162,14 @@ class Profile : Fragment() {
                 PrefKeyEncryptionScheme.AES256_SIV,
                 PrefValueEncryptionScheme.AES256_GCM
             )
-
-            val editor = sharedPref.edit()
-            editor.clear()
-            editor.apply()
+            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
         } catch (e: GeneralSecurityException) {
             e.printStackTrace()
         } catch (e: IOException) {
             e.printStackTrace()
         }
-    }
 
-    private fun changeToMyRecipes() {
-        val intent = Intent(requireActivity(), MyRecipes::class.java)
-        intent.putExtra("user_id", user_id)
-        intent.putExtra("username", username)
-        intent.putExtra("name", name)
-        intent.putExtra("email", email)
-        intent.putExtra("token", token)
-        startActivity(intent)
-    }
-
-    private fun changeToSettings() {
-        val intent = Intent(requireActivity(), Settings::class.java)
-        intent.putExtra("user_id", user_id)
-        intent.putExtra("username", username)
-        intent.putExtra("name", name)
-        intent.putExtra("email", email)
-        intent.putExtra("token", token)
-        startActivity(intent)
-    }
-
-    private fun changeToLogIn() {
-        val intent = Intent(requireActivity(), MainActivity::class.java)
-        startActivity(intent)
-        requireActivity().finish()
+        return token
     }
 
     companion object {

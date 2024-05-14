@@ -59,12 +59,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val (idLoaded, nameLoaded, emailLoaded, tokenLoaded, usernameLoaded) = loadDataLogIn(this)
-        if (idLoaded != null && nameLoaded != null && emailLoaded != null && tokenLoaded != null && usernameLoaded != null) {
+        val (idLoaded, nameLoaded, emailLoaded, usernameLoaded) = loadDataLogIn(this)
+        if (idLoaded != null && nameLoaded != null && emailLoaded != null && usernameLoaded != null) {
             val intent = Intent(this, MainPageNav::class.java)
             intent.putExtra("user_id", idLoaded)
             intent.putExtra("username", usernameLoaded)
-            intent.putExtra("token", tokenLoaded)
             intent.putExtra("email", emailLoaded)
             intent.putExtra("name", nameLoaded)
             startActivity(intent)
@@ -108,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun validateCredentials(username: String, password: String): Boolean {
-        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
+        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*().\\-+=~]{5,15}$")
         val passwordPattern = Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|<>?{}\\[\\]~])(?!.*\\s).{8,}\$")
         if (username.isBlank() or password.isBlank()) {
             labelValidation.setTextColor(Color.RED)
@@ -147,6 +146,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    showError("Invalid username or password")
                     buttonLogIn.isEnabled = true
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
@@ -188,14 +188,6 @@ class MainActivity : AppCompatActivity() {
                 signUpLink.isEnabled = true
             }) {
 
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -207,6 +199,7 @@ class MainActivity : AppCompatActivity() {
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(stringRequest)
     }
+
 
     private fun handleLoginResponse(response: String){
         val builder = GsonBuilder()
@@ -223,6 +216,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("APP_REST",e.toString())
         }
     }
+
 
     private fun getUserInfo(id_user: Int) {
         val url = getString(R.string.getuserURL) + "/$id_user"
@@ -313,8 +307,10 @@ class MainActivity : AppCompatActivity() {
             name = res.name
             if (keeploginBox.isChecked) {
                 saveDataLogIn(context = this,username = username, password = password, token = token, id = id, email = email, name = name)
+            } else {
+                savePasswordLogIn(context = this, password = password, token = token)
             }
-            changeToMainPage(id = id, username = username, token = token, name = name, email = email)
+            changeToMainPage(id = id, username = username, name = name, email = email)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
@@ -332,11 +328,10 @@ class MainActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun changeToMainPage(id: Int, username: String, token: String, name: String, email: String) {
+    private fun changeToMainPage(id: Int, username: String, name: String, email: String) {
         val intent = Intent(this, MainPageNav::class.java)
         intent.putExtra("user_id", id)
         intent.putExtra("username", username)
-        intent.putExtra("token", token)
         intent.putExtra("email", email)
         intent.putExtra("name", name)
         startActivity(intent)
@@ -378,8 +373,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun savePasswordLogIn(context: Context, password: String, token: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            val editor = sharedPref.edit()
+            editor.putString(context.getString(R.string.passwordKey), password)
+            editor.putString(context.getString(R.string.tokenKey), token)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
     private fun loadDataLogIn(context: Context): UserData {
-        var token: String? = null
         var username: String? = null
         var name: String? = null
         var email: String? = null
@@ -399,7 +419,6 @@ class MainActivity : AppCompatActivity() {
             id = sharedPref.getInt(context.getString(R.string.idKey), -1)
             name = sharedPref.getString(context.getString(R.string.nameKey), null)
             email = sharedPref.getString(context.getString(R.string.emailKey), null)
-            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
             username = sharedPref.getString(context.getString(R.string.usernameKey), null)
         } catch (e: GeneralSecurityException) {
             e.printStackTrace()
@@ -407,7 +426,7 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        return UserData(id, name, email, token, username)
+        return UserData(id, name, email, username)
     }
 
 }

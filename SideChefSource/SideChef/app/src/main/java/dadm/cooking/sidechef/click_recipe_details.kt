@@ -1,7 +1,10 @@
 package dadm.cooking.sidechef
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -9,6 +12,13 @@ import androidx.core.view.WindowInsetsCompat
 
 class click_recipe_details : AppCompatActivity() {
     private lateinit var backButton: ImageButton
+    private lateinit var recipeNameLabel: TextView
+    private lateinit var recipeSmallNameLabel: TextView
+    private lateinit var recipeTypeLabel: TextView
+    private lateinit var recipeTimeLabel: TextView
+    private lateinit var recipeIngredientsLabel: TextView
+    private lateinit var recipeInstructionsLabel: TextView
+    private lateinit var recipeImageView: ImageView
     private var recipeId: Int = 0
     private lateinit var recipeName: String
     private lateinit var recipePreparation: String
@@ -30,7 +40,15 @@ class click_recipe_details : AppCompatActivity() {
     }
 
     private fun setupView() {
+        recipeNameLabel = findViewById(R.id.RecipeNameDetails)
+        recipeSmallNameLabel = findViewById(R.id.RecipeSmallNameDetails)
+        recipeTypeLabel = findViewById(R.id.RecipeTypeDetails)
+        recipeTimeLabel = findViewById(R.id.RecipeTimeDetails)
+        recipeImageView = findViewById(R.id.recipeImageDetailed)
+        recipeIngredientsLabel = findViewById(R.id.ingredientListDetails)
+        recipeInstructionsLabel = findViewById(R.id.instructionsDetails)
         backButton = findViewById(R.id.goBackArrowRecipeDetails)
+
         backButton.setOnClickListener {
             changeToMainActivity()
         }
@@ -38,10 +56,30 @@ class click_recipe_details : AppCompatActivity() {
         recipeId = intent.getIntExtra("recipe_id", 0)
         recipeName = intent.getStringExtra("recipe_name") ?: ""
         recipePreparation = intent.getStringExtra("recipe_preparation") ?: ""
-        recipePrepTime = intent.getStringExtra("recipe_prepTime") ?: ""
+        recipePrepTime = intent.getIntExtra("recipe_prepTime", 0).toString()
         recipeType = intent.getStringExtra("recipe_type") ?: ""
         recipeImage = intent.getStringExtra("recipe_picture") ?: ""
         recipeIngredients = intent.getStringExtra("recipe_ingredients") ?: ""
+
+
+        val ingredientsList: MutableList<String> = recipeIngredients.split(",")
+            .map { it.trim() }
+            .map { it.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }
+            .toMutableList()
+
+        val stringBuilder: StringBuilder = StringBuilder()
+
+        for(ingredient in ingredientsList) {
+            stringBuilder.append("- ").append(ingredient).append("\n")
+        }
+
+        recipeNameLabel.text = recipeName
+        recipeSmallNameLabel.text = recipeName
+        recipeTypeLabel.text = recipeType
+        recipeTimeLabel.text = recipePrepTime+"m"
+        //recipeImageView.setImageBitmap(recipeImage)
+        recipeIngredientsLabel.text = stringBuilder.toString()
+        recipeInstructionsLabel.text = recipePreparation
 
     }
 

@@ -21,6 +21,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
@@ -67,6 +68,7 @@ class Settings : AppCompatActivity() {
     private lateinit var old_username: String
     private lateinit var old_email: String
     private val DEFAULT_BACKOFF_MULT: Float = 1f
+    private var fullUserChange: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +87,7 @@ class Settings : AppCompatActivity() {
         username = intent.getStringExtra("username").toString()
         name = intent.getStringExtra("name").toString()
         email = intent.getStringExtra("email").toString()
-        token = intent.getStringExtra("token").toString()
+        token = loadToken(context = this).toString()
 
         frameProgress = findViewById(R.id.frameProgressSettings)
         progressBar = findViewById(R.id.progressBarSettings)
@@ -148,41 +150,25 @@ class Settings : AppCompatActivity() {
 
         if ((isNameChanged or isUsernameChanged or isEmailChanged) and !isPasswordChanged) {
             if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail)) {
-                disableInputs()
-                changeCredentials(name = newName, username = newUsername, email = newEmail)
+                changeCredentials(name = newName, usernameParam = newUsername, email = newEmail)
             }
         } else if (!isNameChanged and !isUsernameChanged and !isEmailChanged and isPasswordChanged) {
             if (validatePassword(newPassword)) {
-                disableInputs()
                 changePassword(password = newPassword)
             }
         } else if ((isNameChanged or isUsernameChanged or isEmailChanged) and isPasswordChanged) {
             if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail) and validatePassword(newPassword)) {
-                disableInputs()
+                fullUserChange = true
                 changePassword(password = newPassword)
-                changeCredentials(name = newName, username = newUsername, email = newEmail)
+                changeCredentials(name = newName, usernameParam = newUsername, email = newEmail)
             }
         }
-    }
-
-    private fun disableInputs() {
-        frameProgress.visibility = View.VISIBLE
-        progressBar.visibility = View.VISIBLE
-        saveChangesButton.isEnabled = false
-        editTextCurrentName.isEnabled = false
-        imageViewEditName.isEnabled = false
-        editTextCurrentUserName.isEnabled = false
-        imageViewEditUserName.isEnabled = false
-        editTextCurrentPassword.isEnabled = false
-        imageViewEditPassword.isEnabled = false
-        editTextCurrentEmail.isEnabled = false
-        imageViewEditEmail.isEnabled = false
     }
 
 
     private fun changePassword(password: String) {
         val url = getString(R.string.changePasswordURL) + "/$user_id"
-
+        disableInputs()
         val jsonBody = JSONObject()
         jsonBody.put("password", password)
         val requestBody = jsonBody.toString()
@@ -191,72 +177,44 @@ class Settings : AppCompatActivity() {
             Method.PUT, url,
             Response.Listener { response ->
                 updatePasswordDataLogIn(context = this, password = password)
+                if (!fullUserChange) {
+                    finish()
+                }
                 try {
                     Log.d("APP_REST",  "changed password"+response)
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    saveChangesButton.isEnabled = true
-                    editTextCurrentName.isEnabled = true;
-                    imageViewEditName.isEnabled = true;
-                    editTextCurrentUserName.isEnabled = true;
-                    imageViewEditUserName.isEnabled = true;
-                    editTextCurrentPassword.isEnabled = true;
-                    imageViewEditPassword.isEnabled = true;
-                    editTextCurrentEmail.isEnabled = true;
-                    imageViewEditEmail.isEnabled = true;
-
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    saveChangesButton.isEnabled = true
-                    editTextCurrentName.isEnabled = true;
-                    imageViewEditName.isEnabled = true;
-                    editTextCurrentUserName.isEnabled = true;
-                    imageViewEditUserName.isEnabled = true;
-                    editTextCurrentPassword.isEnabled = true;
-                    imageViewEditPassword.isEnabled = true;
-                    editTextCurrentEmail.isEnabled = true;
-                    imageViewEditEmail.isEnabled = true;
-
+                    enableInputs()
                 }
             },
             Response.ErrorListener { error ->
-                val errorMessage: String = when(error) {
-                    is AuthFailureError -> "Authentication Error! Check Credentials"
-                    is NetworkError -> "Network error!"
-                    is TimeoutError -> "Time is over!"
-                    is ServerError -> {
-                        try {
-                            val errorResponse = JSONObject(String(error.networkResponse.data))
-                            if (errorResponse.has("error")) {
-                                errorResponse.getString("error")
-                            } else {
+                if (error is AuthFailureError) {
+                    loginBeforeChangePassword(username = username)
+                } else {
+                    val errorMessage: String = when(error) {
+                        is NetworkError -> "Network error!"
+                        is TimeoutError -> "Time is over!"
+                        is ServerError -> {
+                            try {
+                                val errorResponse = JSONObject(String(error.networkResponse.data))
+                                if (errorResponse.has("error")) {
+                                    errorResponse.getString("error")
+                                } else {
+                                    "Unknown server error"
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                                 "Unknown server error"
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            "Unknown server error"
                         }
+                        else -> "Unknown error"
                     }
-                    else -> "Unknown error"
+                    showError(errorMessage)
+                    Log.d("APP_REST", error.toString())
+                    Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                    enableInputs()
                 }
-                showError(errorMessage)
-                Log.d("APP_REST", error.toString())
-                Log.d("APP_REST", error.networkResponse.statusCode.toString())
-                frameProgress.visibility = View.GONE
-                progressBar.visibility = View.GONE
-                saveChangesButton.isEnabled = true
-                editTextCurrentName.isEnabled = true;
-                imageViewEditName.isEnabled = true;
-                editTextCurrentUserName.isEnabled = true;
-                imageViewEditUserName.isEnabled = true;
-                editTextCurrentPassword.isEnabled = true;
-                imageViewEditPassword.isEnabled = true;
-                editTextCurrentEmail.isEnabled = true;
-                imageViewEditEmail.isEnabled = true;
-
             }) {
             override fun getRetryPolicy(): RetryPolicy {
                 return DefaultRetryPolicy(
@@ -285,12 +243,68 @@ class Settings : AppCompatActivity() {
         requestQueue.add(stringRequest)
     }
 
-    private fun changeCredentials(name: String, username: String, email: String) {
-        val url = getString(R.string.changeUserURL) + "/$user_id"
+    private fun loginBeforeChangePassword(username: String) {
+        val password = loadPassword(context = this)
+
+        val url = getString(R.string.loginURL)
 
         val jsonBody = JSONObject()
-        jsonBody.put("name", name.trim())
         jsonBody.put("username", username.trim())
+        jsonBody.put("password", password)
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener { response ->
+                try {
+                    handleLoginChangePasswordResponse(response)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    enableInputs()
+                    Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+                }
+            },
+            Response.ErrorListener { error ->
+                enableInputs()
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+            }) {
+
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun handleLoginChangePasswordResponse(response: String){
+        val builder = GsonBuilder()
+        builder.setPrettyPrinting()
+        val gson = builder.create()
+        try {
+            val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
+            token = res.token
+            SaveToken(context = this, tokenData = res.token)
+            changePassword(password = editTextCurrentPassword.text.toString())
+        } catch (e: JsonSyntaxException) {
+            Log.d("APP_REST",e.toString())
+        }
+    }
+
+
+    private fun changeCredentials(name: String, usernameParam: String, email: String) {
+        val url = getString(R.string.changeUserURL) + "/$user_id"
+        disableInputs()
+        val jsonBody = JSONObject()
+        jsonBody.put("name", name.trim())
+        jsonBody.put("username", usernameParam.trim())
         jsonBody.put("email", email.trim())
         val requestBody = jsonBody.toString()
 
@@ -301,69 +315,41 @@ class Settings : AppCompatActivity() {
                     updateDataLogIn(context = this, name = name, username = username, email = email)
                     handleUpdateUserResponse(response)
                     Log.d("APP_REST",  handleUpdateUserResponse(response).toString())
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    saveChangesButton.isEnabled = true
-                    editTextCurrentName.isEnabled = true;
-                    imageViewEditName.isEnabled = true;
-                    editTextCurrentUserName.isEnabled = true;
-                    imageViewEditUserName.isEnabled = true;
-                    editTextCurrentPassword.isEnabled = true;
-                    imageViewEditPassword.isEnabled = true;
-                    editTextCurrentEmail.isEnabled = true;
-                    imageViewEditEmail.isEnabled = true;
+                    enableInputs()
 
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    saveChangesButton.isEnabled = true
-                    editTextCurrentName.isEnabled = true;
-                    imageViewEditName.isEnabled = true;
-                    editTextCurrentUserName.isEnabled = true;
-                    imageViewEditUserName.isEnabled = true;
-                    editTextCurrentPassword.isEnabled = true;
-                    imageViewEditPassword.isEnabled = true;
-                    editTextCurrentEmail.isEnabled = true;
-                    imageViewEditEmail.isEnabled = true;
-
+                    enableInputs()
                 }
             },
             Response.ErrorListener { error ->
-                val errorMessage: String = when(error) {
-                    is AuthFailureError -> "Authentication Error! Check Credentials"
-                    is NetworkError -> "Network error!"
-                    is TimeoutError -> "Time is over!"
-                    is ServerError -> {
-                        try {
-                            val errorResponse = JSONObject(String(error.networkResponse.data))
-                            if (errorResponse.has("error")) {
-                                errorResponse.getString("error")
-                            } else {
+                if (error is AuthFailureError) {
+                    loginBeforeChangeCredentials(username = username)
+                } else {
+                    val errorMessage: String = when(error) {
+                        is NetworkError -> "Network error!"
+                        is TimeoutError -> "Time is over!"
+                        is ServerError -> {
+                            try {
+                                val errorResponse = JSONObject(String(error.networkResponse.data))
+                                if (errorResponse.has("error")) {
+                                    errorResponse.getString("error")
+                                } else {
+                                    "Unknown server error"
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                                 "Unknown server error"
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            "Unknown server error"
                         }
+                        else -> "Unknown error"
                     }
-                    else -> "Unknown error"
+                    showError(errorMessage)
+                    Log.d("APP_REST", error.toString())
+                    Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                    enableInputs()
                 }
-                showError(errorMessage)
-                Log.d("APP_REST", error.toString())
-                frameProgress.visibility = View.GONE
-                progressBar.visibility = View.GONE
-                saveChangesButton.isEnabled = true
-                editTextCurrentName.isEnabled = true;
-                imageViewEditName.isEnabled = true;
-                editTextCurrentUserName.isEnabled = true;
-                imageViewEditUserName.isEnabled = true;
-                editTextCurrentPassword.isEnabled = true;
-                imageViewEditPassword.isEnabled = true;
-                editTextCurrentEmail.isEnabled = true;
-                imageViewEditEmail.isEnabled = true;
-
             }) {
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
@@ -412,6 +398,62 @@ class Settings : AppCompatActivity() {
         }
     }
 
+    private fun loginBeforeChangeCredentials(username: String) {
+        val password = loadPassword(context = this)
+
+        val url = getString(R.string.loginURL)
+
+        val jsonBody = JSONObject()
+        jsonBody.put("username", username.trim())
+        jsonBody.put("password", password)
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener { response ->
+                try {
+                    handleLoginChangeCredentialsResponse(response)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    enableInputs()
+                    Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+                }
+            },
+            Response.ErrorListener { error ->
+                enableInputs()
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+            }) {
+
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun handleLoginChangeCredentialsResponse(response: String){
+        val builder = GsonBuilder()
+        builder.setPrettyPrinting()
+        val gson = builder.create()
+        try {
+            val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
+            token = res.token
+            SaveToken(context = this, tokenData = res.token)
+            changeCredentials(name = editTextCurrentName.text.toString(), usernameParam = editTextCurrentUserName.text.toString(), email = editTextCurrentEmail.text.toString())
+        } catch (e: JsonSyntaxException) {
+            Log.d("APP_REST",e.toString())
+        }
+    }
+
+
     private fun showError(message: String) {
         labelValidation.setTextColor(Color.RED)
         labelValidation.text = message
@@ -455,7 +497,7 @@ class Settings : AppCompatActivity() {
     }
 
     private fun validateUsername(username: String): Boolean {
-        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*()-+=~]{5,15}$")
+        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*().\\-+=~]{5,15}$")
         if (username.isBlank()) {
             labelValidation.setTextColor(Color.RED)
             labelValidation.text = "Please fill the input fields"
@@ -544,9 +586,108 @@ class Settings : AppCompatActivity() {
         }
     }
 
+    private fun loadPassword(context: Context): String? {
+        var password: String? = null
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            password = sharedPref.getString(context.getString(R.string.passwordKey), null)
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return password
+    }
+
 
     private fun changeToProfile() {
         finish()
+    }
+
+    private fun disableInputs() {
+        frameProgress.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
+        saveChangesButton.isEnabled = false
+        editTextCurrentName.isEnabled = false
+        imageViewEditName.isEnabled = false
+        editTextCurrentUserName.isEnabled = false
+        imageViewEditUserName.isEnabled = false
+        editTextCurrentPassword.isEnabled = false
+        imageViewEditPassword.isEnabled = false
+        editTextCurrentEmail.isEnabled = false
+        imageViewEditEmail.isEnabled = false
+    }
+
+    private fun enableInputs() {
+        frameProgress.visibility = View.GONE
+        progressBar.visibility = View.GONE
+        saveChangesButton.isEnabled = true
+        editTextCurrentName.isEnabled = true
+        imageViewEditName.isEnabled = true
+        editTextCurrentUserName.isEnabled = true
+        imageViewEditUserName.isEnabled = true
+        editTextCurrentPassword.isEnabled = true
+        imageViewEditPassword.isEnabled = true
+        editTextCurrentEmail.isEnabled = true
+        imageViewEditEmail.isEnabled = true
+    }
+
+    private fun loadToken(context: Context): String? {
+        var token: String? = null
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return token
+    }
+
+    private fun SaveToken(context: Context, tokenData: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            val editor = sharedPref.edit()
+            editor.putString(context.getString(R.string.tokenKey), tokenData)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     private fun enableEditText(editText: EditText) {

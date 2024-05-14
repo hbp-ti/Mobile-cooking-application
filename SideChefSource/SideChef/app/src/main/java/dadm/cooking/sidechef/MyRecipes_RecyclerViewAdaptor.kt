@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.graphics.PorterDuff
+import android.util.Log
 import android.view.LayoutInflater
 
 class MyRecipes_RecyclerViewAdaptor(private val context: Context, private var recipeList: MutableList<GetSavedRecipesResponseData>): RecyclerView.Adapter<MyRecipes_RecyclerViewAdaptor.ViewHolder>() {
@@ -34,26 +35,26 @@ class MyRecipes_RecyclerViewAdaptor(private val context: Context, private var re
 //        holder.recipeImage.setImageBitmap(decodedByte)
         holder.recipeTitle.text = recipe.name
         holder.recipeType.text = recipe.type
-        holder.recipeTime.text = recipe.prepTime.toString()
+        holder.recipeTime.text = recipe.prepTime.toString()+"m"
         holder.recipe_Fk = recipe.id_recipe
         holder.favoritedIcon.setColorFilter(ContextCompat.getColor(context, R.color.redLogOut), PorterDuff.Mode.SRC_IN)
-
+        Log.d("APP_ADAPTER_Recipes", recipeList.toString())
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(recipe)
         }
 
-        holder.recipeImage.setOnClickListener {
+        holder.favoritedIcon.setOnClickListener {
             // Parar a propagaçao para o pai (itemview)
             it?.parent?.requestDisallowInterceptTouchEvent(true)
 
             onImageClick?.invoke(recipe)
-
             recipeList.removeAt(holder.adapterPosition)
             notifyItemRemoved(holder.adapterPosition)
         }
     }
 
     override fun getItemCount(): Int {
+        Log.d("APP_ADAPTER_Recipes", recipeList.size.toString())
         return recipeList.size
     }
 

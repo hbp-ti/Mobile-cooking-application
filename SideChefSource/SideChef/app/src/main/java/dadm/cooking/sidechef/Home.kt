@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -92,11 +94,9 @@ class Home : Fragment() {
         frameProgress = view.findViewById(R.id.frameProgressHome)
         progressBar = view.findViewById(R.id.progressBarHome)
         recyclerView = view.findViewById(R.id.recyclerHome)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         user_id = requireActivity().intent.getIntExtra("user_id", 0)
         username = requireActivity().intent.getStringExtra("username").toString()
-        token = requireActivity().intent.getStringExtra("token").toString()
+        token = loadToken(context = requireActivity()).toString()
         name = requireActivity().intent.getStringExtra("name").toString()
         email = requireActivity().intent.getStringExtra("email").toString()
         progressBar.visibility = View.VISIBLE
@@ -145,8 +145,8 @@ class Home : Fragment() {
 
             override fun getRetryPolicy(): RetryPolicy {
                 return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    10000,
+                    0,
                     DEFAULT_BACKOFF_MULT
                 )
             }
@@ -163,6 +163,12 @@ class Home : Fragment() {
 
         try {
             val res: List<GetRecipesResponseData> = gson.fromJson(response, Array<GetRecipesResponseData>::class.java).toList()
+            Log.d("APP_REST", response)
+            recyclerView.setHasFixedSize(true)
+            recyclerView.layoutManager = LinearLayoutManager(requireActivity())
+            val dividerItemDecoration = DividerItemDecoration(requireActivity() , DividerItemDecoration.VERTICAL)
+            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.vertical_spacing_recycler)!!)
+            recyclerView.addItemDecoration(dividerItemDecoration)
             val adapter = Home_RecyclerViewAdapter(recipeList = res)
             recyclerView.adapter = adapter
 
@@ -175,6 +181,7 @@ class Home : Fragment() {
                 intent.putExtra("recipe_type", recipe.type)
                 intent.putExtra("recipe_picture", recipe.picture)
                 intent.putExtra("recipe_ingredients", recipe.ingredients)
+                startActivity(intent)
             }
 
             adapter.onImageClick = { recipe ->
@@ -218,14 +225,6 @@ class Home : Fragment() {
                 Log.d("APP_REST", error.networkResponse.statusCode.toString())
             }) {
 
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -245,6 +244,7 @@ class Home : Fragment() {
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
+            SaveToken(context = requireActivity(), tokenData = res.token)
             getRecipes(token = token)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -347,14 +347,6 @@ class Home : Fragment() {
                 Toast.makeText(requireActivity(), "Failed to renew token", Toast.LENGTH_SHORT).show()
             }) {
 
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -374,6 +366,7 @@ class Home : Fragment() {
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
+            SaveToken(context = requireActivity(), tokenData = res.token)
             favoriteRecipe(token = token, name = name_recipe, preparation = preparation_recipe, prepTime = prepTime_recipe, type = type_recipe, picture = picture_recipe, ingredients = ingredients_recipe, idUser = user_id , id_Recipe = id_Recipe)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -403,6 +396,53 @@ class Home : Fragment() {
         }
 
         return password
+    }
+
+    private fun SaveToken(context: Context, tokenData: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            val editor = sharedPref.edit()
+            editor.putString(context.getString(R.string.tokenKey), tokenData)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadToken(context: Context): String? {
+        var token: String? = null
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            token = sharedPref.getString(context.getString(R.string.tokenKey), null)
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return token
     }
 
     companion object {
