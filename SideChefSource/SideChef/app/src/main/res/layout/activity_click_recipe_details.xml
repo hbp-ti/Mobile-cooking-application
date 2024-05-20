@@ -76,7 +76,7 @@
     <TextView
         android:id="@+id/ingredientTitleDetais"
         android:layout_width="185dp"
-        android:layout_height="21dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="35dp"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/inter"
@@ -94,7 +94,7 @@
         android:id="@+id/ingredientListDetails"
         android:layout_width="190dp"
         android:layout_height="289dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="6dp"
         android:layout_marginBottom="55dp"
         android:fontFamily="@font/inter"
         android:padding="8dp"

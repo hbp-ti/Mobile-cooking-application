@@ -11,6 +11,7 @@
     <string name="getSavedRecipesURL">https://sidechef-api.vercel.app/getSavedRecipes_user</string>
     <string name="removeRecipeURL">https://sidechef-api.vercel.app/deleteRecipe</string>
     <string name="addRecipeURL">https://sidechef-api.vercel.app/addRecipe</string>
+    <string name="getRecipeByNameURL">https://sidechef-api.vercel.app/getRecipes</string>
     <string name="ProfileData">profileDataUpdated</string>
     <string name="tokenKey">tokenKey</string>
     <string name="usernameKey">usernameKey</string>

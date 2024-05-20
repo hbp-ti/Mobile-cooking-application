@@ -286,7 +286,7 @@
 			"response": []
 		},
 		{
-			"name": "getRecipe",
+			"name": "getRecipes",
 			"request": {
 				"auth": {
 					"type": "jwt",
@@ -336,7 +336,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://sidechef-api.vercel.app/getRecipe/2",
+					"raw": "https://sidechef-api.vercel.app/getRecipes/receita2",
 					"protocol": "https",
 					"host": [
 						"sidechef-api",
@@ -344,11 +344,11 @@
 						"app"
 					],
 					"path": [
-						"getRecipe",
-						"2"
+						"getRecipes",
+						"receita2"
 					]
 				},
-				"description": "### Get Recipe Details\n\nThis endpoint makes an HTTP GET request to retrieve the details of a specific recipe.\n\n#### Response\n\nThe response for this request is a JSON object with the following schema:\n\n``` json\n{\n  \"recipeId\": \"string\",\n  \"recipeName\": \"string\",\n  \"ingredients\": [\"string\"],\n  \"instructions\": [\"string\"],\n  \"prepTime\": \"string\",\n  \"cookTime\": \"string\",\n  \"totalTime\": \"string\",\n  \"servings\": \"string\",\n  \"calories\": \"string\",\n  \"imageUrl\": \"string\",\n  \"chefName\": \"string\",\n  \"chefId\": \"string\"\n}\n\n ```"
+				"description": "### Get Recipe Details\n\nThis endpoint makes an HTTP GET request to retrieve the details of an array of recipes that have the name parameter passed in the url in the word of the recipe.\n\n#### Request\n\nNo request body is required for this endpoint.\n\n#### Response\n\nThe response for this request is a JSON object with the following schema"
 			},
 			"response": []
 		},
