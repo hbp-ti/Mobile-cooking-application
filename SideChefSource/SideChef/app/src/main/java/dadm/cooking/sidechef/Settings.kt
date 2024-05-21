@@ -149,15 +149,15 @@ class Settings : AppCompatActivity() {
         val isPasswordChanged = newPassword != "*****"
 
         if ((isNameChanged or isUsernameChanged or isEmailChanged) and !isPasswordChanged) {
-            if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail)) {
+            if (validateInput(newName, "name") && validateInput(newUsername, "username") && validateInput(newEmail, "email")) {
                 changeCredentials(name = newName, usernameParam = newUsername, email = newEmail)
             }
         } else if (!isNameChanged and !isUsernameChanged and !isEmailChanged and isPasswordChanged) {
-            if (validatePassword(newPassword)) {
+            if (validateInput(newPassword, "password")) {
                 changePassword(password = newPassword)
             }
         } else if ((isNameChanged or isUsernameChanged or isEmailChanged) and isPasswordChanged) {
-            if (validateName(newName) and validateUsername(newUsername) and validateEmail(newEmail) and validatePassword(newPassword)) {
+            if (validateInput(newName, "name") && validateInput(newUsername, "username") && validateInput(newEmail, "email") and validateInput(newPassword, "password")) {
                 fullUserChange = true
                 changePassword(password = newPassword)
                 changeCredentials(name = newName, usernameParam = newUsername, email = newEmail)
@@ -460,76 +460,69 @@ class Settings : AppCompatActivity() {
         labelValidation.visibility = View.VISIBLE
     }
 
-    private fun validateName(name: String): Boolean {
+    private fun validateInput(value: String, validationType: String): Boolean {
         val namePattern = Regex("^[a-zA-ZÀ-ÖØ-öø-ÿ ]{2,30}\$")
-        if (name.isBlank()) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Please fill the input fields"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else if (!name.matches(namePattern)) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "The name should not include numbers and must be between 2 and 30 letters"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else {
-            labelValidation.visibility = View.INVISIBLE
-            return true
-        }
-    }
-
-    private fun validateEmail(email: String): Boolean {
         val emailPattern = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$")
-        if (email.isBlank()) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Please fill the input fields"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else if (!email.matches(emailPattern)) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Please enter a valid email address in the format name@domain.com"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else {
-            labelValidation.visibility = View.INVISIBLE
-            return true
-        }
-    }
-
-    private fun validateUsername(username: String): Boolean {
-        val usernamePattern = Regex("^[a-zA-Z0-9_!@#\$%^&*().\\-+=~]{5,15}$")
-        if (username.isBlank()) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Please fill the input fields"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else if (!username.matches(usernamePattern)) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Username should have between 5 to 15 characters"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else {
-            labelValidation.visibility = View.INVISIBLE
-            return true
-        }
-    }
-
-    private fun validatePassword(password: String): Boolean {
+        val usernamePattern = Regex("^[a-zA-Z0-9_!@#%^&*().\\-+=~]{5,15}$")
         val passwordPattern = Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|<>?{}\\[\\]~])(?!.*\\s).{8,}\$")
-        if (password.isBlank()) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Please fill the input fields"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else if (!password.matches(passwordPattern)) {
-            labelValidation.setTextColor(Color.RED)
-            labelValidation.text = "Password must have at least 8 characters, one uppercase letter, one digit, and one special character"
-            labelValidation.visibility = View.VISIBLE
-            return false
-        } else {
-            labelValidation.visibility = View.INVISIBLE
-            return true
+
+        when (validationType) {
+            "name" -> {
+                if (value.isBlank()) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Please fill the input fields"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                } else if (!value.matches(namePattern)) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "The name should not include numbers and must be between 2 and 30 letters"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                }
+            }
+            "email" -> {
+                if (value.isBlank()) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Please fill the input fields"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                } else if (!value.matches(emailPattern)) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Please enter a valid email address in the format name@domain.com"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                }
+            }
+            "username" -> {
+                if (value.isBlank()) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Please fill the input fields"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                } else if (!value.matches(usernamePattern)) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Username should have between 5 to 15 characters"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                }
+            }
+            "password" -> {
+                if (value.isBlank()) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Please fill the input fields"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                } else if (!value.matches(passwordPattern)) {
+                    labelValidation.setTextColor(Color.RED)
+                    labelValidation.text = "Password must have at least 8 characters, one uppercase letter, one digit, and one special character"
+                    labelValidation.visibility = View.VISIBLE
+                    return false
+                }
+            }
         }
+
+        labelValidation.visibility = View.INVISIBLE
+        return true
     }
 
     private fun updateDataLogIn(context: Context, name: String, email: String, username: String) {

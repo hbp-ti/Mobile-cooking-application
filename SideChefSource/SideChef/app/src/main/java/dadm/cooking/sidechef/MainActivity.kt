@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val (idLoaded, nameLoaded, emailLoaded, usernameLoaded) = loadDataLogIn(this)
-        if (idLoaded != null && nameLoaded != null && emailLoaded != null && usernameLoaded != null) {
+        if (idLoaded != null && idLoaded != -1 && nameLoaded != null && emailLoaded != null && usernameLoaded != null) {
             val intent = Intent(this, MainPageNav::class.java)
             intent.putExtra("user_id", idLoaded)
             intent.putExtra("username", usernameLoaded)
