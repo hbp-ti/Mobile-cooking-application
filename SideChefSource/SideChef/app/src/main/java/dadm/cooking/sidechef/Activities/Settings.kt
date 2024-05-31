@@ -1,12 +1,10 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -16,13 +14,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.FragmentManager
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.NetworkError
@@ -41,6 +37,9 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
 import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
 import androidx.security.crypto.MasterKey
+import dadm.cooking.sidechef.API.ChangeUserData
+import dadm.cooking.sidechef.API.LoginResponseData
+import dadm.cooking.sidechef.R
 import java.io.IOException
 import java.security.GeneralSecurityException
 
@@ -167,7 +166,7 @@ class Settings : AppCompatActivity() {
 
 
     private fun changePassword(password: String) {
-        val url = getString(R.string.changePasswordURL) + "/$user_id"
+        val url = getString(R.string.changePasswordURL)
         disableInputs()
         val jsonBody = JSONObject()
         jsonBody.put("password", password)
@@ -300,7 +299,7 @@ class Settings : AppCompatActivity() {
 
 
     private fun changeCredentials(name: String, usernameParam: String, email: String) {
-        val url = getString(R.string.changeUserURL) + "/$user_id"
+        val url = getString(R.string.changeUserURL)
         disableInputs()
         val jsonBody = JSONObject()
         jsonBody.put("name", name.trim())

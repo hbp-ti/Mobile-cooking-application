@@ -1,4 +1,4 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.content.Context
 import android.content.Intent
@@ -34,6 +34,10 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
 import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
 import androidx.security.crypto.MasterKey
+import dadm.cooking.sidechef.API.GetUserProfileData
+import dadm.cooking.sidechef.API.LoginResponseData
+import dadm.cooking.sidechef.DataClasses.UserData
+import dadm.cooking.sidechef.R
 import java.io.IOException
 import java.security.GeneralSecurityException
 
@@ -211,15 +215,15 @@ class MainActivity : AppCompatActivity() {
             token = res.token
             username = res.username
             password = passwordInput.text.toString()
-            getUserInfo(res.id)
+            getUserInfo()
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
     }
 
 
-    private fun getUserInfo(id_user: Int) {
-        val url = getString(R.string.getuserURL) + "/$id_user"
+    private fun getUserInfo() {
+        val url = getString(R.string.getuserURL)
         val stringRequest: StringRequest = object : StringRequest(
             Method.GET, url,
             Response.Listener { response ->

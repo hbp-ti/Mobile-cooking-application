@@ -1,7 +1,6 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -9,6 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import dadm.cooking.sidechef.R
 
 class click_recipe_details : AppCompatActivity() {
     private lateinit var backButton: ImageButton
@@ -77,7 +80,17 @@ class click_recipe_details : AppCompatActivity() {
         recipeSmallNameLabel.text = recipeName
         recipeTypeLabel.text = recipeType
         recipeTimeLabel.text = recipePrepTime+"m"
-        //recipeImageView.setImageBitmap(recipeImage)
+        try {
+            val decodedString: ByteArray = Base64.decode(recipeImage, Base64.DEFAULT)
+            val decodedByte: Bitmap =  BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+            recipeImageView.setImageBitmap(decodedByte)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         recipeIngredientsLabel.text = stringBuilder.toString()
         recipeInstructionsLabel.text = recipePreparation
 

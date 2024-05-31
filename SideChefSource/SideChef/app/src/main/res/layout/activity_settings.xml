@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/darkgradient"
     android:gravity="center"
-    tools:context=".Settings">
+    tools:context=".Activities.Settings">
 
 
     <TextView

@@ -12,7 +12,7 @@ CREATE TABLE Recipe(
     preparation VARCHAR(600) NOT NULL,
     prepTime Int NOT NULL,
     type VARCHAR(15) NOT NULL,
-    picture VARCHAR(100) NOT NULL,
+    picture text NOT NULL,
     ingredients VARCHAR(300) NOT NULL
 );
 
@@ -22,7 +22,7 @@ CREATE TABLE SavedRecipe(
     preparation VARCHAR(600) NOT NULL,
     prepTime Int NOT NULL,
     type VARCHAR(15) NOT NULL,
-    picture VARCHAR(100) NOT NULL,
+    picture text NOT NULL,
     ingredients VARCHAR(300) NOT NULL,
     idUser INT NOT NULL,
     idRec INT NOT NULL,

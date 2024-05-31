@@ -1,4 +1,4 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.DataClasses
 
 data class UserData(
     val id: Int?,

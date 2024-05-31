@@ -1,17 +1,19 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,36 +23,25 @@ import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionSc
 import androidx.security.crypto.MasterKey
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.NetworkError
 import com.android.volley.Response
 import com.android.volley.RetryPolicy
-import com.android.volley.ServerError
-import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import com.google.gson.annotations.SerializedName
+import dadm.cooking.sidechef.API.GetSavedRecipesResponseData
+import dadm.cooking.sidechef.API.LoginResponseData
+import dadm.cooking.sidechef.Adapters.MyRecipes_RecyclerViewAdaptor
+import dadm.cooking.sidechef.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.nio.charset.Charset
 import java.security.GeneralSecurityException
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class MyRecipes : AppCompatActivity() {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [Home.newInstance] factory method to
- * create an instance of this fragment.
- */
-class Home : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var backButton: ImageButton
     private lateinit var progressBar: ProgressBar
     private lateinit var frameProgress: FrameLayout
     private lateinit var recyclerView: RecyclerView
@@ -60,65 +51,61 @@ class Home : Fragment() {
     private lateinit var token: String
     private lateinit var email: String
     private lateinit var name: String
-    private lateinit var name_recipe: String
-    private lateinit var preparation_recipe: String
-    private var prepTime_recipe: Int = -1
-    private lateinit var type_recipe: String
-    private lateinit var picture_recipe: String
-    private lateinit var ingredients_recipe: String
-    private var id_Recipe: Int = -1
-
+    private var id_recipe_remove: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_my_recipes)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        setupView()
+    }
+
+
+
+    private fun setupView() {
+        frameProgress = findViewById(R.id.frameProgressMyRecipes)
+        progressBar = findViewById(R.id.progressBarMyRecipes)
+        backButton = findViewById(R.id.goBackArrowRecipes)
+        recyclerView = findViewById(R.id.recyclerMyRecipes)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        user_id = intent.getIntExtra("user_id", 0)
+        username = intent.getStringExtra("username").toString()
+        token = loadToken(context = this).toString()
+        name = intent.getStringExtra("name").toString()
+        email = intent.getStringExtra("email").toString()
+        progressBar.visibility = View.VISIBLE
+        frameProgress.visibility = View.VISIBLE
+        backButton.isEnabled = false
+        getSavedRecipes(token = token)
+
+        backButton.setOnClickListener {
+            changeToProfile()
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupView(view  = view, savedInstanceState = savedInstanceState)
-    }
-
-    private fun setupView(view: View, savedInstanceState: Bundle?) {
-        frameProgress = view.findViewById(R.id.frameProgressHome)
-        progressBar = view.findViewById(R.id.progressBarHome)
-        recyclerView = view.findViewById(R.id.recyclerHome)
-        user_id = requireActivity().intent.getIntExtra("user_id", 0)
-        username = requireActivity().intent.getStringExtra("username").toString()
-        token = loadToken(context = requireActivity()).toString()
-        name = requireActivity().intent.getStringExtra("name").toString()
-        email = requireActivity().intent.getStringExtra("email").toString()
-        progressBar.visibility = View.VISIBLE
-        frameProgress.visibility = View.VISIBLE
-        getRecipes(token = token)
-    }
-
-    private fun getRecipes(token: String) {
-        val url = getString(R.string.getRecipesURL)
+    private fun getSavedRecipes(token: String) {
+        val url = getString(R.string.getSavedRecipesURL)
         val stringRequest: StringRequest = object : StringRequest(
             Method.GET, url,
             Response.Listener { response ->
                 try {
-                    handleGetRecipesResponse(response)
+                    handleGetSavedRecipesResponse(response)
                     progressBar.visibility = View.GONE
                     frameProgress.visibility = View.GONE
+                    backButton.isEnabled = true
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace())
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    Toast.makeText(requireActivity(), "Failed to get recipes", Toast.LENGTH_SHORT).show()
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to get recipes", Toast.LENGTH_SHORT).show()
                 }
             },
             Response.ErrorListener { error ->
@@ -127,166 +114,8 @@ class Home : Fragment() {
                 } else {
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    Toast.makeText(requireActivity(), "Failed to get recipes", Toast.LENGTH_SHORT).show()
-                    Log.d("APP_REST", error.toString())
-                    Log.d("APP_REST", error.networkResponse.statusCode.toString())
-                }
-            }) {
-
-            override fun getBodyContentType(): String {
-                return "application/json; charset=utf-8"
-            }
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Authorization"] = "Bearer $token"
-                return headers
-            }
-
-            override fun getRetryPolicy(): RetryPolicy {
-                return DefaultRetryPolicy(
-                    10000,
-                    0,
-                    DEFAULT_BACKOFF_MULT
-                )
-            }
-
-        }
-        val requestQueue = Volley.newRequestQueue(requireActivity())
-        requestQueue.add(stringRequest)
-    }
-
-    private fun handleGetRecipesResponse(response: String) {
-        val builder = GsonBuilder()
-        builder.setPrettyPrinting()
-        val gson = builder.create()
-
-        try {
-            val res: List<GetRecipesResponseData> = gson.fromJson(response, Array<GetRecipesResponseData>::class.java).toList()
-            Log.d("APP_REST", response)
-            recyclerView.setHasFixedSize(true)
-            recyclerView.layoutManager = LinearLayoutManager(requireActivity())
-            val dividerItemDecoration = DividerItemDecoration(requireActivity() , DividerItemDecoration.VERTICAL)
-            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.vertical_spacing_recycler)!!)
-            recyclerView.addItemDecoration(dividerItemDecoration)
-            val adapter = Home_RecyclerViewAdapter(recipeList = res)
-            recyclerView.adapter = adapter
-
-            adapter.onItemClick = { recipe ->
-                val intent = Intent(requireActivity(), click_recipe_details::class.java)
-                intent.putExtra("recipe_id", recipe.id)
-                intent.putExtra("recipe_name", recipe.name)
-                intent.putExtra("recipe_preparation", recipe.preparation)
-                intent.putExtra("recipe_prepTime", recipe.prepTime)
-                intent.putExtra("recipe_type", recipe.type)
-                intent.putExtra("recipe_picture", recipe.picture)
-                intent.putExtra("recipe_ingredients", recipe.ingredients)
-                startActivity(intent)
-            }
-
-            adapter.onImageClick = { recipe ->
-                name_recipe = recipe.name
-                preparation_recipe = recipe.preparation
-                prepTime_recipe = recipe.prepTime
-                type_recipe = recipe.type
-                picture_recipe = recipe.picture
-                ingredients_recipe = recipe.ingredients
-                id_Recipe = recipe.id
-                favoriteRecipe(token = token, name = recipe.name, preparation = recipe.preparation, prepTime = recipe.prepTime, type = recipe.type, picture = recipe.picture, ingredients = recipe.ingredients, idUser = user_id , id_Recipe = recipe.id)
-            }
-        } catch (e: JsonSyntaxException) {
-            Log.d("APP_REST",e.toString())
-        }
-    }
-
-    private fun loginBeforeGetRecipes(username: String) {
-        val password = loadPassword(context = requireActivity())
-
-        val url = getString(R.string.loginURL)
-
-        val jsonBody = JSONObject()
-        jsonBody.put("username", username.trim())
-        jsonBody.put("password", password)
-        val requestBody = jsonBody.toString()
-
-        val stringRequest: StringRequest = object : StringRequest(Method.POST, url,
-            Response.Listener { response ->
-                try {
-                    handleLoginResponse(response)
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                }
-            },
-            Response.ErrorListener { error ->
-                Log.d("APP_REST", error.toString())
-                Log.d("APP_REST", error.networkResponse.statusCode.toString())
-            }) {
-
-            override fun getBodyContentType(): String {
-                return "application/json; charset=utf-8"
-            }
-
-            override fun getBody(): ByteArray {
-                return requestBody.toByteArray(Charset.defaultCharset())
-            }
-        }
-        val requestQueue = Volley.newRequestQueue(requireActivity())
-        requestQueue.add(stringRequest)
-    }
-
-    private fun handleLoginResponse(response: String){
-        val builder = GsonBuilder()
-        builder.setPrettyPrinting()
-        val gson = builder.create()
-        try {
-            val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
-            token = res.token
-            SaveToken(context = requireActivity(), tokenData = res.token)
-            getRecipes(token = token)
-        } catch (e: JsonSyntaxException) {
-            Log.d("APP_REST",e.toString())
-        }
-    }
-
-
-    private fun favoriteRecipe(token: String, name: String, preparation: String, prepTime: Int, type: String, picture: String, ingredients: String, idUser: Int, id_Recipe: Int) {
-        val url = getString(R.string.addRecipeURL)
-
-        val jsonBody = JSONObject()
-        jsonBody.put("name", name.trim())
-        jsonBody.put("preparation", preparation.trim())
-        jsonBody.put("prepTime", prepTime)
-        jsonBody.put("type", type.trim())
-        jsonBody.put("picture", picture.trim())
-        jsonBody.put("ingredients", ingredients.trim())
-        jsonBody.put("idUser", idUser)
-        jsonBody.put("idRec", id_Recipe)
-        val requestBody = jsonBody.toString()
-
-        val stringRequest: StringRequest = object : StringRequest(
-            Method.POST, url,
-            Response.Listener { response ->
-                try {
-                    progressBar.visibility = View.GONE
-                    frameProgress.visibility = View.GONE
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                    Log.d("APP_REST","JSONException" + e.printStackTrace())
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    Toast.makeText(requireActivity(), "Failed to add recipes", Toast.LENGTH_SHORT).show()
-                }
-            },
-            Response.ErrorListener { error ->
-                if (error is AuthFailureError) {
-                    loginBeforeAddRecipe(username = username)
-                } else {
-                    frameProgress.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    Toast.makeText(requireActivity(), "Failed to add recipes", Toast.LENGTH_SHORT).show()
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to get recipes", Toast.LENGTH_SHORT).show()
                     Log.d("APP_REST", error.toString())
                     Log.d("APP_REST", error.networkResponse.statusCode.toString())
                 }
@@ -310,16 +139,50 @@ class Home : Fragment() {
                 )
             }
 
-            override fun getBody(): ByteArray {
-                return requestBody.toByteArray(Charset.defaultCharset())
-            }
         }
-        val requestQueue = Volley.newRequestQueue(requireActivity())
+        val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(stringRequest)
     }
 
-    private fun loginBeforeAddRecipe(username: String) {
-        val password = loadPassword(context = requireActivity())
+    private fun handleGetSavedRecipesResponse(response: String) {
+        val builder = GsonBuilder()
+        builder.setPrettyPrinting()
+        val gson = builder.create()
+
+        try {
+            val res: MutableList<GetSavedRecipesResponseData> = gson.fromJson(response, Array<GetSavedRecipesResponseData>::class.java).toMutableList()
+            val adapter = MyRecipes_RecyclerViewAdaptor(context = this, recipeList = res)
+            val dividerItemDecoration = DividerItemDecoration(this , DividerItemDecoration.VERTICAL)
+            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(this ,
+                R.drawable.vertical_spacing_recycler
+            )!!)
+            recyclerView.addItemDecoration(dividerItemDecoration)
+            recyclerView.adapter = adapter
+
+            adapter.onItemClick = { recipe ->
+                val intent = Intent(this, click_recipe_details::class.java)
+                intent.putExtra("recipe_id", recipe.id)
+                intent.putExtra("recipe_name", recipe.name)
+                intent.putExtra("recipe_preparation", recipe.preparation)
+                intent.putExtra("recipe_prepTime", recipe.prepTime)
+                intent.putExtra("recipe_type", recipe.type)
+                intent.putExtra("recipe_picture", recipe.picture)
+                intent.putExtra("recipe_ingredients", recipe.ingredients)
+                intent.putExtra("fk_recipe_id", recipe.id_recipe)
+                startActivity(intent)
+            }
+
+            adapter.onImageClick = { recipe ->
+                id_recipe_remove = recipe.id
+                removeFavoriteRecipe(recipe_id = recipe.id, token = token)
+            }
+        } catch (e: JsonSyntaxException) {
+            Log.d("APP_REST",e.toString())
+        }
+    }
+
+    private fun loginBeforeGetRecipes(username: String) {
+        val password = loadPassword(context = this)
 
         val url = getString(R.string.loginURL)
 
@@ -332,19 +195,21 @@ class Home : Fragment() {
             Method.POST, url,
             Response.Listener { response ->
                 try {
-                    handleLoginAddRecipeResponse(response)
+                    handleLoginResponse(response)
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    Toast.makeText(requireActivity(), "Failed to renew token", Toast.LENGTH_SHORT).show()
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
                 }
             },
             Response.ErrorListener { error ->
                 Log.d("APP_REST", error.toString())
                 Log.d("APP_REST", error.networkResponse.statusCode.toString())
-                Toast.makeText(requireActivity(), "Failed to renew token", Toast.LENGTH_SHORT).show()
+                backButton.isEnabled = true
+                Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
             }) {
 
             override fun getBodyContentType(): String {
@@ -355,19 +220,131 @@ class Home : Fragment() {
                 return requestBody.toByteArray(Charset.defaultCharset())
             }
         }
-        val requestQueue = Volley.newRequestQueue(requireActivity())
+        val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(stringRequest)
     }
 
-    private fun handleLoginAddRecipeResponse(response: String){
+    private fun handleLoginResponse(response: String){
         val builder = GsonBuilder()
         builder.setPrettyPrinting()
         val gson = builder.create()
         try {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
-            SaveToken(context = requireActivity(), tokenData = res.token)
-            favoriteRecipe(token = token, name = name_recipe, preparation = preparation_recipe, prepTime = prepTime_recipe, type = type_recipe, picture = picture_recipe, ingredients = ingredients_recipe, idUser = user_id , id_Recipe = id_Recipe)
+            SaveToken(context = this, tokenData = res.token)
+            getSavedRecipes(token = token)
+        } catch (e: JsonSyntaxException) {
+            Log.d("APP_REST",e.toString())
+        }
+    }
+
+
+    private fun removeFavoriteRecipe(recipe_id: Int, token: String) {
+        val url = getString(R.string.removeRecipeURL) + "/$recipe_id"
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.DELETE, url,
+            Response.Listener { response ->
+                try {
+                    progressBar.visibility = View.GONE
+                    frameProgress.visibility = View.GONE
+                    backButton.isEnabled = true
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace())
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to remove recipes", Toast.LENGTH_SHORT).show()
+                }
+            },
+            Response.ErrorListener { error ->
+                if (error is AuthFailureError) {
+                    loginBeforeRemoveRecipe(username = username)
+                } else {
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to remove recipes", Toast.LENGTH_SHORT).show()
+                    Log.d("APP_REST", error.toString())
+                    Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                }
+            }) {
+
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer $token"
+                return headers
+            }
+
+            override fun getRetryPolicy(): RetryPolicy {
+                return DefaultRetryPolicy(
+                    20000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DEFAULT_BACKOFF_MULT
+                )
+            }
+
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun loginBeforeRemoveRecipe(username: String) {
+        val password = loadPassword(context = this)
+
+        val url = getString(R.string.loginURL)
+
+        val jsonBody = JSONObject()
+        jsonBody.put("username", username.trim())
+        jsonBody.put("password", password)
+        val requestBody = jsonBody.toString()
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener { response ->
+                try {
+                    handleLoginRemoveRecipeResponse(response)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Log.d("APP_REST","JSONException" + e.printStackTrace() )
+                    frameProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    backButton.isEnabled = true
+                    Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+                }
+            },
+            Response.ErrorListener { error ->
+                Log.d("APP_REST", error.toString())
+                Log.d("APP_REST", error.networkResponse.statusCode.toString())
+                backButton.isEnabled = true
+                Toast.makeText(this, "Failed to renew token", Toast.LENGTH_SHORT).show()
+            }) {
+
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray(Charset.defaultCharset())
+            }
+        }
+        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue.add(stringRequest)
+    }
+
+    private fun handleLoginRemoveRecipeResponse(response: String){
+        val builder = GsonBuilder()
+        builder.setPrettyPrinting()
+        val gson = builder.create()
+        try {
+            val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
+            token = res.token
+            SaveToken(context = this, tokenData = res.token)
+            removeFavoriteRecipe(recipe_id = id_recipe_remove, token = token)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
@@ -398,29 +375,6 @@ class Home : Fragment() {
         return password
     }
 
-    private fun SaveToken(context: Context, tokenData: String) {
-        try {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-
-            val sharedPref = EncryptedSharedPreferences.create(
-                context,
-                context.getString(R.string.userLogInFile),
-                masterKey,
-                PrefKeyEncryptionScheme.AES256_SIV,
-                PrefValueEncryptionScheme.AES256_GCM
-            )
-            val editor = sharedPref.edit()
-            editor.putString(context.getString(R.string.tokenKey), tokenData)
-            editor.apply()
-        } catch (e: GeneralSecurityException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     private fun loadToken(context: Context): String? {
         var token: String? = null
         try {
@@ -445,23 +399,30 @@ class Home : Fragment() {
         return token
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Home.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Home().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun SaveToken(context: Context, tokenData: String) {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val sharedPref = EncryptedSharedPreferences.create(
+                context,
+                context.getString(R.string.userLogInFile),
+                masterKey,
+                PrefKeyEncryptionScheme.AES256_SIV,
+                PrefValueEncryptionScheme.AES256_GCM
+            )
+            val editor = sharedPref.edit()
+            editor.putString(context.getString(R.string.tokenKey), tokenData)
+            editor.apply()
+        } catch (e: GeneralSecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun changeToProfile() {
+        finish()
     }
 }

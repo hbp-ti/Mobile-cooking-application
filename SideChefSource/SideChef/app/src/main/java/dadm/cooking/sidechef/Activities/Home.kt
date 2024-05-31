@@ -1,21 +1,17 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +27,10 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import dadm.cooking.sidechef.API.GetRecipesResponseData
+import dadm.cooking.sidechef.API.LoginResponseData
+import dadm.cooking.sidechef.Adapters.Home_RecyclerViewAdapter
+import dadm.cooking.sidechef.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -44,12 +44,13 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [Search.newInstance] factory method to
+ * Use the [Home.newInstance] factory method to
  * create an instance of this fragment.
  */
-class Search : Fragment() {
-
-    private lateinit var searchBar: SearchView
+class Home : Fragment() {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
     private lateinit var progressBar: ProgressBar
     private lateinit var frameProgress: FrameLayout
     private lateinit var recyclerView: RecyclerView
@@ -66,11 +67,7 @@ class Search : Fragment() {
     private lateinit var picture_recipe: String
     private lateinit var ingredients_recipe: String
     private var id_Recipe: Int = -1
-    private lateinit var nameRecipeWord: String
 
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,48 +82,30 @@ class Search : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search, container, false)
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupView(view = view, savedInstanceState = savedInstanceState)
+        setupView(view  = view, savedInstanceState = savedInstanceState)
     }
 
     private fun setupView(view: View, savedInstanceState: Bundle?) {
-        searchBar = view.findViewById(R.id.search_bar)
-        //Nao sei pq mas fica assim mal
-        val editText = searchBar.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-        editText.setTextColor(Color.BLACK)
-
-        frameProgress = view.findViewById(R.id.frameProgressSearch)
-        progressBar = view.findViewById(R.id.progressBarSearch)
-        recyclerView = view.findViewById(R.id.recyclerSearch)
+        frameProgress = view.findViewById(R.id.frameProgressHome)
+        progressBar = view.findViewById(R.id.progressBarHome)
+        recyclerView = view.findViewById(R.id.recyclerHome)
         user_id = requireActivity().intent.getIntExtra("user_id", 0)
         username = requireActivity().intent.getStringExtra("username").toString()
         token = loadToken(context = requireActivity()).toString()
         name = requireActivity().intent.getStringExtra("name").toString()
         email = requireActivity().intent.getStringExtra("email").toString()
-
-        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                nameRecipeWord = query.trim()
-                progressBar.visibility = View.VISIBLE
-                frameProgress.visibility = View.VISIBLE
-                searchBar.isEnabled = false
-                getRecipes(token = token, name = nameRecipeWord)
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                return false
-            }
-        })
+        progressBar.visibility = View.VISIBLE
+        frameProgress.visibility = View.VISIBLE
+        getRecipes(token = token)
     }
 
-
-    private fun getRecipes(token: String, name: String) {
-        val url = getString(R.string.getRecipeByNameURL) + "/$name"
+    private fun getRecipes(token: String) {
+        val url = getString(R.string.getRecipesURL)
         val stringRequest: StringRequest = object : StringRequest(
             Method.GET, url,
             Response.Listener { response ->
@@ -134,13 +113,11 @@ class Search : Fragment() {
                     handleGetRecipesResponse(response)
                     progressBar.visibility = View.GONE
                     frameProgress.visibility = View.GONE
-                    searchBar.isEnabled = true
                 } catch (e: JSONException) {
                     e.printStackTrace()
                     Log.d("APP_REST","JSONException" + e.printStackTrace())
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    searchBar.isEnabled = true
                     Toast.makeText(requireActivity(), "Failed to get recipes", Toast.LENGTH_SHORT).show()
                 }
             },
@@ -150,7 +127,6 @@ class Search : Fragment() {
                 } else {
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    searchBar.isEnabled = true
                     Toast.makeText(requireActivity(), "Failed to get recipes", Toast.LENGTH_SHORT).show()
                     Log.d("APP_REST", error.toString())
                     Log.d("APP_REST", error.networkResponse.statusCode.toString())
@@ -191,9 +167,11 @@ class Search : Fragment() {
             recyclerView.setHasFixedSize(true)
             recyclerView.layoutManager = LinearLayoutManager(requireActivity())
             val dividerItemDecoration = DividerItemDecoration(requireActivity() , DividerItemDecoration.VERTICAL)
-            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.vertical_spacing_recycler)!!)
+            dividerItemDecoration.setDrawable(ContextCompat.getDrawable(requireActivity(),
+                R.drawable.vertical_spacing_recycler
+            )!!)
             recyclerView.addItemDecoration(dividerItemDecoration)
-            val adapter = Search_RecyclerViewAdapter(recipeList = res)
+            val adapter = Home_RecyclerViewAdapter(recipeList = res)
             recyclerView.adapter = adapter
 
             adapter.onItemClick = { recipe ->
@@ -216,7 +194,7 @@ class Search : Fragment() {
                 picture_recipe = recipe.picture
                 ingredients_recipe = recipe.ingredients
                 id_Recipe = recipe.id
-                favoriteRecipe(token = token, name = recipe.name, preparation = recipe.preparation, prepTime = recipe.prepTime, type = recipe.type, picture = recipe.picture, ingredients = recipe.ingredients, idUser = user_id , id_Recipe = recipe.id)
+                favoriteRecipe(token = token, name = recipe.name, preparation = recipe.preparation, prepTime = recipe.prepTime, type = recipe.type, picture = recipe.picture, ingredients = recipe.ingredients, id_Recipe = recipe.id)
             }
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
@@ -233,8 +211,7 @@ class Search : Fragment() {
         jsonBody.put("password", password)
         val requestBody = jsonBody.toString()
 
-        val stringRequest: StringRequest = object : StringRequest(
-            Method.POST, url,
+        val stringRequest: StringRequest = object : StringRequest(Method.POST, url,
             Response.Listener { response ->
                 try {
                     handleLoginResponse(response)
@@ -243,7 +220,6 @@ class Search : Fragment() {
                     Log.d("APP_REST","JSONException" + e.printStackTrace() )
                     frameProgress.visibility = View.GONE
                     progressBar.visibility = View.GONE
-                    searchBar.isEnabled = true
                 }
             },
             Response.ErrorListener { error ->
@@ -271,14 +247,14 @@ class Search : Fragment() {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
             SaveToken(context = requireActivity(), tokenData = res.token)
-            getRecipes(token = token, name = nameRecipeWord)
+            getRecipes(token = token)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
     }
 
 
-    private fun favoriteRecipe(token: String, name: String, preparation: String, prepTime: Int, type: String, picture: String, ingredients: String, idUser: Int, id_Recipe: Int) {
+    private fun favoriteRecipe(token: String, name: String, preparation: String, prepTime: Int, type: String, picture: String, ingredients: String, id_Recipe: Int) {
         val url = getString(R.string.addRecipeURL)
 
         val jsonBody = JSONObject()
@@ -288,7 +264,6 @@ class Search : Fragment() {
         jsonBody.put("type", type.trim())
         jsonBody.put("picture", picture.trim())
         jsonBody.put("ingredients", ingredients.trim())
-        jsonBody.put("idUser", idUser)
         jsonBody.put("idRec", id_Recipe)
         val requestBody = jsonBody.toString()
 
@@ -393,7 +368,7 @@ class Search : Fragment() {
             val res: LoginResponseData = gson.fromJson(response, LoginResponseData::class.java)
             token = res.token
             SaveToken(context = requireActivity(), tokenData = res.token)
-            favoriteRecipe(token = token, name = name_recipe, preparation = preparation_recipe, prepTime = prepTime_recipe, type = type_recipe, picture = picture_recipe, ingredients = ingredients_recipe, idUser = user_id , id_Recipe = id_Recipe)
+            favoriteRecipe(token = token, name = name_recipe, preparation = preparation_recipe, prepTime = prepTime_recipe, type = type_recipe, picture = picture_recipe, ingredients = ingredients_recipe, id_Recipe = id_Recipe)
         } catch (e: JsonSyntaxException) {
             Log.d("APP_REST",e.toString())
         }
@@ -423,7 +398,6 @@ class Search : Fragment() {
 
         return password
     }
-
 
     private fun SaveToken(context: Context, tokenData: String) {
         try {
@@ -479,12 +453,12 @@ class Search : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment Search.
+         * @return A new instance of fragment Home.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            Search().apply {
+            Home().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)

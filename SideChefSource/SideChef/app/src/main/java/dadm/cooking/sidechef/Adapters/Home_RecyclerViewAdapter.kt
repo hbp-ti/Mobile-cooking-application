@@ -1,6 +1,5 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Adapters
 
-import android.content.Context
 import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
@@ -13,25 +12,36 @@ import android.util.Base64
 import android.graphics.PorterDuff
 import android.util.Log
 import android.view.LayoutInflater
+import dadm.cooking.sidechef.API.GetRecipesResponseData
+import dadm.cooking.sidechef.R
 
-class Search_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseData>): RecyclerView.Adapter<Search_RecyclerViewAdapter.ViewHolder>() {
+class Home_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponseData>): RecyclerView.Adapter<Home_RecyclerViewAdapter.ViewHolder>() {
     var onItemClick : ((GetRecipesResponseData) -> Unit)? = null
     var onImageClick : ((GetRecipesResponseData) -> Unit)? = null
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): Search_RecyclerViewAdapter.ViewHolder {
+    ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_row, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: Search_RecyclerViewAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val recipe = recipeList[position]
         holder.recipeId = recipe.id
-//        val decodedString: ByteArray = Base64.decode(recipeList[position].picture, Base64.DEFAULT)
-//        val decodedByte: Bitmap =  BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-//        holder.recipeImage.setImageBitmap(decodedByte
+        try {
+            val decodedString: ByteArray = Base64.decode(recipeList[position].picture, Base64.DEFAULT)
+            val decodedByte: Bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+            holder.recipeImage.setImageBitmap(decodedByte)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         holder.recipeTitle.text = recipe.name
         holder.recipeType.text = recipe.type
         holder.recipeTime.text = recipe.prepTime.toString()+"m"
@@ -45,7 +55,9 @@ class Search_RecyclerViewAdapter(private val recipeList: List<GetRecipesResponse
             it?.parent?.requestDisallowInterceptTouchEvent(true)
 
             onImageClick?.invoke(recipe)
-            holder.favoritedIcon.setColorFilter(ContextCompat.getColor(holder.itemView.context, R.color.redLogOut), PorterDuff.Mode.SRC_IN)
+            holder.favoritedIcon.setColorFilter(ContextCompat.getColor(holder.itemView.context,
+                R.color.redLogOut
+            ), PorterDuff.Mode.SRC_IN)
         }
     }
 

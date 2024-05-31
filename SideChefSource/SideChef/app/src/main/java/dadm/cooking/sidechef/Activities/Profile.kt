@@ -1,35 +1,19 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
-import com.android.volley.AuthFailureError
-import com.android.volley.NetworkError
-import com.android.volley.Response
-import com.android.volley.ServerError
-import com.android.volley.TimeoutError
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
-import org.json.JSONException
-import org.json.JSONObject
-import java.nio.charset.Charset
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
 import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
 import androidx.security.crypto.MasterKey
+import dadm.cooking.sidechef.R
 import java.io.IOException
 import java.security.GeneralSecurityException
 
@@ -121,8 +105,6 @@ class Profile : Fragment() {
             e.printStackTrace()
         }
     }
-
-
 
     private fun changeToMyRecipes() {
         val intent = Intent(requireActivity(), MyRecipes::class.java)

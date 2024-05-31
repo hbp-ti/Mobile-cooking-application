@@ -1,4 +1,4 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.Activities
 
 import android.content.Intent
 import android.graphics.Color
@@ -23,6 +23,7 @@ import com.android.volley.ServerError
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import dadm.cooking.sidechef.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset

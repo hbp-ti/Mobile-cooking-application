@@ -1,4 +1,4 @@
-package dadm.cooking.sidechef
+package dadm.cooking.sidechef.API
 
 import com.google.gson.annotations.SerializedName
 

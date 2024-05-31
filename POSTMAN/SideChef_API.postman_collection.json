@@ -57,7 +57,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://sidechef-api.vercel.app/getUser/hugo004_",
+					"raw": "https://sidechef-api.vercel.app/getUser",
 					"protocol": "https",
 					"host": [
 						"sidechef-api",
@@ -65,11 +65,10 @@
 						"app"
 					],
 					"path": [
-						"getUser",
-						"hugo004_"
+						"getUser"
 					]
 				},
-				"description": "This endpoint makes an HTTP GET request to retrieve user data for for a user from the SideChef API.\n\n### Request\n\nThe request does not include a request body. The user identifier \"username\" is included as a path parameter in the request URL.\n\n- Path parameter:\n    - username (string): The unique identifier of the user for whom the data is being retrieved.\n\n### Response\n\nThe response will contain the user data in the JSON format, including details such as user ID, name, email, and any other relevant user information."
+				"description": "This endpoint makes an HTTP GET request to retrieve user data for for a user from the SideChef API.\n\n### Request\n\nThe request does not include a request body. The user identifier \"username\" is included as a path parameter in the request URL.\n\n- Path parameter: None\n    \n\n### Response\n\nThe response will contain the user data in the JSON format, including details such as user ID, name, email, and any other relevant user information."
 			},
 			"response": []
 		},
@@ -193,7 +192,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://sidechef-api.vercel.app/changeUser/2",
+					"raw": "https://sidechef-api.vercel.app/changeUser",
 					"protocol": "https",
 					"host": [
 						"sidechef-api",
@@ -201,11 +200,10 @@
 						"app"
 					],
 					"path": [
-						"changeUser",
-						"2"
+						"changeUser"
 					]
 				},
-				"description": "### Change User Details\n\nThis endpoint allows the user to update their details.\n\n#### Request\n\n- Method: PUT\n- URL: `https://sidechef-api.vercel.app/changeUser/2`\n    \n\n##### Request Body\n\n- Type: JSON\n    - `name` (string, optional): The updated name of the user.\n    - `email` (string, optional): The updated email of the user.\n    - `username` (string, optional): The updated username of the user.\n\n#### Response\n\nThe response for this request is not provided. However, the response can be expected to be in the JSON format.\n\n#### JSON Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
+				"description": "### Change User Details\n\nThis endpoint allows the user to update their details.\n\n#### Request\n\n- Method: PUT\n    \n- URL: `https://sidechef-api.vercel.app/changeUser`\n    \n\n##### Request Body\n\n- Type: JSON\n    - `name` (string, optional): The updated name of the user.\n        \n    - `email` (string, optional): The updated email of the user.\n        \n    - `username` (string, optional): The updated username of the user.\n        \n\n#### Response\n\nThe response for this request is not provided. However, the response can be expected to be in the JSON format.\n\n#### JSON Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
 			},
 			"response": []
 		},
@@ -269,7 +267,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://sidechef-api.vercel.app/changePassword/2",
+					"raw": "https://sidechef-api.vercel.app/changePassword",
 					"protocol": "https",
 					"host": [
 						"sidechef-api",
@@ -277,8 +275,7 @@
 						"app"
 					],
 					"path": [
-						"changePassword",
-						"2"
+						"changePassword"
 					]
 				},
 				"description": "### Change Password\n\nThis endpoint is used to update the password for a specific user.\n\n#### Request Body\n\n- `Password` (string, required): The new password for the user.\n    \n\n#### Response\n\nThe response will include the updated user information if the password change is successful."
@@ -403,7 +400,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://sidechef-api.vercel.app/getSavedRecipes_user/2",
+					"raw": "https://sidechef-api.vercel.app/getSavedRecipes_user",
 					"protocol": "https",
 					"host": [
 						"sidechef-api",
@@ -411,8 +408,7 @@
 						"app"
 					],
 					"path": [
-						"getSavedRecipes_user",
-						"2"
+						"getSavedRecipes_user"
 					]
 				},
 				"description": "\nThis endpoint makes an HTTP GET request to retrieve the saved recipes for a specific user. The request does not include a request body, as it is a simple GET request. The response will include the details of the saved recipes for the specified user.\n"
@@ -471,7 +467,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"string\",\r\n    \"preparation\": \"string\",\r\n    \"prepTime\": \"string\",\r\n    \"type\": \"string\",\r\n    \"picture\": \"string\",\r\n    \"ingredients\": \"string\",\r\n    \"idUser\": 0,\r\n    \"idRec\": 0\r\n}",
+					"raw": "{\r\n    \"name\": \"string\",\r\n    \"preparation\": \"string\",\r\n    \"prepTime\": \"string\",\r\n    \"type\": \"string\",\r\n    \"picture\": \"string\",\r\n    \"ingredients\": \"string\",\r\n    \"idRec\": 0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -490,7 +486,7 @@
 						"addRecipe"
 					]
 				},
-				"description": "This API endpoint allows you to add a new recipe by sending an HTTP POST request to the specified URL. The request should include a JSON payload in the raw request body, with the following parameters:\n\n- `name` (string): The name of the recipe.\n- `preparation` (string): The preparation instructions for the recipe.\n- `prepTime` (string): The preparation time required for the recipe.\n- `type` (string): The type or category of the recipe.\n- `picture` (string): The picture URL of the recipe.\n- `ingredients` (string): The list of ingredients required for the recipe.\n- `idUser` (number): The user ID associated with the recipe.\n- `idRec` (number): The recipe ID.\n    \n\nUpon successful submission, the API will return a response with the relevant details of the newly added recipe."
+				"description": "This API endpoint allows you to add a new recipe by sending an HTTP POST request to the specified URL. The request should include a JSON payload in the raw request body, with the following parameters:\n\n- `name` (string): The name of the recipe.\n    \n- `preparation` (string): The preparation instructions for the recipe.\n    \n- `prepTime` (string): The preparation time required for the recipe.\n    \n- `type` (string): The type or category of the recipe.\n    \n- `picture` (string): The picture URL of the recipe.\n    \n- `ingredients` (string): The list of ingredients required for the recipe.\n    \n- `idRec` (number): The recipe ID.\n    \n\nUpon successful submission, the API will return a response with the relevant details of the newly added recipe."
 			},
 			"response": []
 		},

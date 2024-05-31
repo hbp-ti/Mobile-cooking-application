@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/darkgradient"
     android:id="@+id/profileFragmnet"
-    tools:context=".Profile">
+    tools:context=".Activities.Profile">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
